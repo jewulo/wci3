@@ -1,5 +1,7 @@
 package wci.frontend;
 
+import wci.message.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -9,8 +11,14 @@ import java.io.IOException;
  * <p>The framework class that represents the source program.</>
  */
 
-public class Source
+public class Source implements MessageProducer
 {
+    protected static MessageHandler messageHandler; // message handler delegate
+
+    static {
+        messageHandler = new MessageHandler();
+    }
+
     public static final char EOL = '\n';            // end-of-line character
     public static final char EOF = (char) 0;        // end-of-file character
 
@@ -18,6 +26,7 @@ public class Source
     private String line;                            // source line
     private int lineNum;                            // current source line number
     private int currentPos;                         // current source line position
+
 
     /**
      * Constructor.
@@ -30,6 +39,36 @@ public class Source
         this.lineNum = 0;
         this.currentPos = -2; // set to -2 to read the first source line
         this.reader = reader;
+    }
+
+    /**
+     * Add a parser message listener.
+     * @param listener the message listener to add.
+     */
+    @Override
+    public void addMessageListener(MessageListener listener)
+    {
+        messageHandler.addListener(listener);
+    }
+
+    /**
+     * Remove a parser messagelistener.
+     * @param listener the message listener to remove.
+     */
+    @Override
+    public void removeMessageListener(MessageListener listener)
+    {
+        messageHandler.removeListener(listener);
+    }
+
+    /**
+     * Notify listeners after setting the message.
+     * @param message to set.
+     */
+    @Override
+    public void sendMessage(Message message)
+    {
+        messageHandler.sendMessage(message);
     }
 
     /**
@@ -123,6 +162,13 @@ public class Source
 
         if (line != null) {
             ++lineNum;
+        }
+
+        // Send a source line message containing the line number
+        // and the line text to all listeners.
+        if (line != null) {
+            sendMessage(new Message(MessageType.SOURCE_lINE,
+                                    new Object[] {lineNum, line}));
         }
     }
 

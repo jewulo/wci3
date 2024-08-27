@@ -2,6 +2,7 @@ package wci.frontend;
 
 import wci.intermediate.ICode;
 import wci.intermediate.SymTab;
+import wci.message.*;
 
 /**
  * <h1>Parser</>
@@ -9,12 +10,14 @@ import wci.intermediate.SymTab;
  * <p> A language-independent framework class. This abstract parser class
  * will be implemented by language-specific subclasses.</p>
  */
-public abstract class Parser
+public abstract class Parser implements MessageProducer
 {
-    protected static SymTab symTab;         // generated symbol table
+    protected static SymTab symTab;                     // generated symbol table
+    protected static MessageHandler messageHandler;     // message handler delegate
 
     static {
         symTab = null;
+        messageHandler = new MessageHandler();
     }
 
     protected Scanner scanner;              // scanner used with this parser
@@ -65,5 +68,35 @@ public abstract class Parser
             throws Exception
     {
         return scanner.nextToken();
+    }
+
+    /**
+     * Add a parser message listener.
+     * @param listener the message listener to add.
+     */
+    @Override
+    public void addMessageListener(MessageListener listener)
+    {
+        messageHandler.addListener(listener);
+    }
+
+    /**
+     * Remove a parser messagelistener.
+     * @param listener the message listener to remove.
+     */
+    @Override
+    public void removeMessageListener(MessageListener listener)
+    {
+        messageHandler.removeListener(listener);
+    }
+
+    /**
+     * Notify listeners after setting the message.
+     * @param message to set.
+     */
+    @Override
+    public void sendMessage(Message message)
+    {
+        messageHandler.sendMessage(message);
     }
 }

@@ -77,4 +77,13 @@ public class Token
     {
         return source.peekChar();
     }
+
+    /**
+     * Return the line number of this token.
+     * @return line number of the token
+     */
+    public Number getLineNumber()
+    {
+        return lineNum;
+    }
 }
