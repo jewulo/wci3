@@ -7,6 +7,8 @@ import wci.message.Message;
 import wci.message.MessageListener;
 import wci.message.MessageType;
 
+import static wci.message.MessageType.INTERPRETER_SUMMARY;
+
 public class Executor extends Backend
 {
     /**
@@ -26,7 +28,7 @@ public class Executor extends Backend
         int runtimeErrors = 0;
 
         // Send the compiler summary message.
-        sendMessage(new Message(MessageType.INTERPRETER_SUMMARY,
+        sendMessage(new Message(INTERPRETER_SUMMARY,
                 new Number[] {executionCount,
                               runtimeErrors,
                               elapsedTime}));

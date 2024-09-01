@@ -28,10 +28,12 @@ public class FrontEndFactory
             return new PascalParserTD(scanner);
         }
         else if (!language.equalsIgnoreCase("Pascal")) {
-            throw new Exception("Parser factory: Invalid language '" + language + "'");
+            throw new Exception("Parser factory: Invalid language '" +
+                                language + "'");
         }
         else {
-            throw new Exception("Parser factory: Invalid type '" + type + "'");
+            throw new Exception("Parser factory: Invalid type '" +
+                                type + "'");
         }
     }
 }

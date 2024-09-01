@@ -1,9 +1,10 @@
 package wci.frontend;
 
-import wci.message.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
+
+import wci.message.*;
+import static wci.message.MessageType.SOURCE_LINE;
 
 /**
  * <h1>Source</h1>
@@ -13,11 +14,11 @@ import java.io.IOException;
 
 public class Source implements MessageProducer
 {
-    protected static MessageHandler messageHandler; // message handler delegate
-
-    static {
-        messageHandler = new MessageHandler();
-    }
+//    protected static MessageHandler messageHandler; // message handler delegate
+//
+//    static {
+//        messageHandler = new MessageHandler();
+//    }
 
     public static final char EOL = '\n';            // end-of-line character
     public static final char EOF = (char) 0;        // end-of-file character
@@ -26,6 +27,8 @@ public class Source implements MessageProducer
     private String line;                            // source line
     private int lineNum;                            // current source line number
     private int currentPos;                         // current source line position
+
+    private MessageHandler messageHandler; // message handler delegate
 
 
     /**
@@ -39,6 +42,7 @@ public class Source implements MessageProducer
         this.lineNum = 0;
         this.currentPos = -2; // set to -2 to read the first source line
         this.reader = reader;
+        this.messageHandler = new MessageHandler();
     }
 
     /**
@@ -109,7 +113,7 @@ public class Source implements MessageProducer
         }
         // At end of line?
         else if ((currentPos == -1) || (currentPos == line.length())) {
-            return EOF;
+            return EOL;
         }
         // Need to read the next line?
         else if (currentPos > line.length()) {
@@ -124,7 +128,7 @@ public class Source implements MessageProducer
 
     /**
      * Consume the current source character and return the next character
-     * @returns the next source character.
+     * @return the next source character.
      * @throws Exception if an error occurred.
      */
     public char nextChar()
@@ -137,6 +141,8 @@ public class Source implements MessageProducer
     /**
      * Return the source character following the current character without
      * consuming the current character.
+     * @return the following character.
+     * @throws Exception if an error occurred.
      */
     public char peekChar()
             throws Exception
@@ -167,14 +173,14 @@ public class Source implements MessageProducer
         // Send a source line message containing the line number
         // and the line text to all listeners.
         if (line != null) {
-            sendMessage(new Message(MessageType.SOURCE_lINE,
+            sendMessage(new Message(MessageType.SOURCE_LINE,
                                     new Object[] {lineNum, line}));
         }
     }
 
     /**
      * Close the source.
-     * @throws Exception if an error occured.
+     * @throws Exception if an error occurred.
      */
     public void close()
             throws Exception

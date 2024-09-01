@@ -30,6 +30,43 @@ public class Token
     }
 
     /**
+     * Getter.
+     * @return the token text.
+     */
+    public String getText()
+    {
+        return text;
+    }
+
+    /**
+     * Getter.
+     * @return the token value.
+     */
+    public Object getValue()
+    {
+        return value;
+    }
+
+    /**
+     * Return the line number of this token.
+     * @return line number of the token
+     */
+
+    public int getLineNumber()
+    {
+        return lineNum;
+    }
+
+    /**
+     * Getter.
+     * @return the position.
+     */
+    public int getPosition()
+    {
+        return position;
+    }
+
+    /**
      * Default method to extract only one-character tokens from the source.
      * Subclasses can override this method to construct language-specific
      * tokens. After extracting the token, the current source line position
@@ -76,14 +113,5 @@ public class Token
             throws Exception
     {
         return source.peekChar();
-    }
-
-    /**
-     * Return the line number of this token.
-     * @return line number of the token
-     */
-    public Number getLineNumber()
-    {
-        return lineNum;
     }
 }

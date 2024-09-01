@@ -47,7 +47,8 @@ public class Pascal
             symTab = parser.getSymTab();
 
             backend.process(iCode, symTab);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             System.out.println("***** Internal translator error. *****");
             ex.printStackTrace();
         }
@@ -65,6 +66,7 @@ public class Pascal
     {
         try {
             String operation = args[0];
+            //String operation = "execute";
 
             // Operation.
             if (!(   operation.equalsIgnoreCase("compile")
@@ -112,11 +114,12 @@ public class Pascal
             Object[] body = (Object[]) message.getBody();
 
             switch (type) {
-                case SOURCE_lINE: {
+                case SOURCE_LINE: {
                     int lineNumber = (Integer) body[0];
                     String lineText = (String) body[1];
 
-                    System.out.println(String.format(SOURCE_LINE_FORMAT, lineNumber, lineText));
+                    System.out.println(String.format(SOURCE_LINE_FORMAT,
+                                                     lineNumber, lineText));
                     break;
                 }
 
@@ -151,7 +154,9 @@ public class Pascal
                     int syntaxErrors =  (Integer) body[1];
                     float elapsedTime = (Float) body[2];
 
-                    System.out.printf(PARSER_SUMMARY_FORMAT, statementCount, syntaxErrors, elapsedTime);
+                    System.out.printf(PARSER_SUMMARY_FORMAT,
+                                        statementCount, syntaxErrors,
+                                        elapsedTime);
                     break;
                 }
                 default:
@@ -189,7 +194,9 @@ public class Pascal
                     int runtimeErrors =  (Integer) body[1];
                     float elapsedTime = (Float) body[2];
 
-                    System.out.printf(INTERPRETER_SUMMARY_FORMAT, executionCount, runtimeErrors, elapsedTime);
+                    System.out.printf(INTERPRETER_SUMMARY_FORMAT,
+                                    executionCount, runtimeErrors,
+                                    elapsedTime);
                     break;
                 }
 
@@ -198,7 +205,8 @@ public class Pascal
                     int instructionCount = (Integer) body[0];
                     float elapsedTime = (Float) body[1];
 
-                    System.out.printf(COMPILER_SUMMARY_FORMAT, instructionCount, elapsedTime);
+                    System.out.printf(COMPILER_SUMMARY_FORMAT,
+                            instructionCount, elapsedTime);
                     break;
                 }
 

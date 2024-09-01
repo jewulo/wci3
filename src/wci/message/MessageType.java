@@ -2,7 +2,7 @@ package wci.message;
 
 public enum MessageType
 {
-    SOURCE_lINE,
+    SOURCE_LINE,
     SYNTAX_ERROR,
     PARSER_SUMMARY,
     INTERPRETER_SUMMARY,
