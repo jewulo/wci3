@@ -3,7 +3,12 @@ package wci.frontend.pascal;
 import wci.frontend.*;
 import wci.message.Message;
 
+import static wci.frontend.pascal.PascalErrorCode.IO_ERROR;
+import static wci.frontend.pascal.PascalTokenType.ERROR;
 import static wci.message.MessageType.PARSER_SUMMARY;
+import static wci.message.MessageType.TOKEN;
+
+
 
 /**
  * <h1>PascalParserTD</>
@@ -22,6 +27,7 @@ public class PascalParserTD extends Parser
         super(scanner);
     }
 
+    protected static PascalErrorHandler errorHandler = new PascalErrorHandler();
     /**
      * Parse a Pascal source program and generate the symbol
      * and the intermediate code.
@@ -35,14 +41,38 @@ public class PascalParserTD extends Parser
         Token   token;
         long    startTime = System.currentTimeMillis();
 
-        while (!((token = nextToken()) instanceof EofToken)) {}
+        try {
+            // Loop over ea
+            while (!((token = nextToken()) instanceof EofToken)) {
+                TokenType tokenType = token.getType();
 
-        // Send the parser summary message.
-        float elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0f;
-        sendMessage(new Message(PARSER_SUMMARY,
-                new Number[] {token.getLineNumber(),
-                              getErrorCount(),
-                              elapsedTime}));
+                if (tokenType != ERROR) {
+
+                    // Format each token
+                    sendMessage(new Message(TOKEN,
+                                            new Object[] {token.getLineNumber(),
+                                                          token.getPosition(),
+                                                          tokenType,
+                                                          token.getText(),
+                                                          token.getValue()}));
+                }
+                else {
+                    errorHandler.flag(token, (PascalErrorCode) token.getValue(),
+                                      this);
+                }
+
+            }
+
+            // Send the parser summary message.
+            float elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0f;
+            sendMessage(new Message(PARSER_SUMMARY,
+                    new Number[] {token.getLineNumber(),
+                            getErrorCount(),
+                            elapsedTime}));
+
+        } catch (java.io.IOException e) {
+            errorHandler.abortTranslation(IO_ERROR, this);
+        }
 
     }
 
@@ -53,6 +83,6 @@ public class PascalParserTD extends Parser
     @Override
     public int getErrorCount()
     {
-        return 0;
+        return errorHandler.getErrorCount();
     }
 }

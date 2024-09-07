@@ -114,4 +114,8 @@ public class Token
     {
         return source.peekChar();
     }
+
+    public TokenType getType() {
+        return type;
+    }
 }
