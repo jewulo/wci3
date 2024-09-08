@@ -1,10 +1,12 @@
 package wci.frontend.pascal;
 
 import wci.frontend.*;
+import wci.intermediate.SymTabEntry;
 import wci.message.Message;
 
 import static wci.frontend.pascal.PascalErrorCode.IO_ERROR;
 import static wci.frontend.pascal.PascalTokenType.ERROR;
+import static wci.frontend.pascal.PascalTokenType.IDENTIFIER;
 import static wci.message.MessageType.PARSER_SUMMARY;
 import static wci.message.MessageType.TOKEN;
 
@@ -42,34 +44,44 @@ public class PascalParserTD extends Parser
         long    startTime = System.currentTimeMillis();
 
         try {
-            // Loop over ea
+            // Loop over each token until the end of file.
             while (!((token = nextToken()) instanceof EofToken)) {
                 TokenType tokenType = token.getType();
 
-                if (tokenType != ERROR) {
+                // Cross-reference only the identifiers
+                if (tokenType == IDENTIFIER) {
+                    String name = token.getText().toLowerCase();
 
-                    // Format each token
-                    sendMessage(new Message(TOKEN,
-                                            new Object[] {token.getLineNumber(),
-                                                          token.getPosition(),
-                                                          tokenType,
-                                                          token.getText(),
-                                                          token.getValue()}));
+                    // If it is not already in the symbol table.
+                    // create and enter a new entry for the identifier.
+                    SymTabEntry entry = symTabStack.lookup(name);
+                    if (entry == null) {
+                        entry = symTabStack.enterLocal(name);
+                    }
+
+                    // Append the current line number to the entry
+                    entry.appendLineNumber(token.getLineNumber());
                 }
-                else {
+                else if (tokenType == ERROR) {
                     errorHandler.flag(token, (PascalErrorCode) token.getValue(),
-                                      this);
-                }
+                                this);
 
+//                    // Format each token
+//                    sendMessage(new Message(TOKEN,
+//                                            new Object[] {token.getLineNumber(),
+//                                                          token.getPosition(),
+//                                                          tokenType,
+//                                                          token.getText(),
+//                                                          token.getValue()}));
+                }
             }
 
             // Send the parser summary message.
             float elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0f;
             sendMessage(new Message(PARSER_SUMMARY,
-                    new Number[] {token.getLineNumber(),
-                            getErrorCount(),
-                            elapsedTime}));
-
+                                    new Number[] {token.getLineNumber(),
+                                                  getErrorCount(),
+                                                  elapsedTime}));
         } catch (java.io.IOException e) {
             errorHandler.abortTranslation(IO_ERROR, this);
         }

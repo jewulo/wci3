@@ -6,6 +6,7 @@ import wci.intermediate.*;
 import wci.backend.*;
 import wci.message.*;
 import wci.frontend.pascal.PascalTokenType.*;
+import wci.util.CrossReferencer;
 
 import static wci.frontend.pascal.PascalTokenType.*;
 
@@ -16,11 +17,11 @@ import static wci.frontend.pascal.PascalTokenType.*;
  */
 public class Pascal
 {
-    private Parser parser;      // language-independent parser
-    private Source source;      // language-independent scanner
-    private ICode iCode;        // generated intermediate code
-    private SymTab symTab;      // generated symbol table
-    private Backend backend;    // backend
+    private Parser parser;              // language-independent parser
+    private Source source;              // language-independent scanner
+    private ICode iCode;                // generated intermediate code
+    private Backend backend;            // backend
+    private SymTabStack symTabStack;    // symbol table stack
 
     /**
      * Compile or interpret a Pascal program.
@@ -47,9 +48,13 @@ public class Pascal
             source.close();
 
             iCode = parser.getICode();
-            symTab = parser.getSymTab();
+            symTabStack = parser.getSymTabStack();
 
-            backend.process(iCode, symTab);
+            if (xref) {
+                CrossReferencer crossReferencer = new CrossReferencer();
+                crossReferencer.print(symTabStack);
+            }
+            backend.process(iCode, symTabStack);
         }
         catch (Exception ex) {
             System.out.println("***** Internal translator error. *****");
