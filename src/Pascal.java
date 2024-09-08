@@ -189,7 +189,7 @@ public class Pascal
                         if (tokenType == STRING) {
                             tokenValue = "\"" + tokenType + "\"";
                         }
-                        System.out.println(String.format(VALUE_FORMAT));
+                        System.out.println(String.format(VALUE_FORMAT, tokenValue));
                     }
 
                     break;

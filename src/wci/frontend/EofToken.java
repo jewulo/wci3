@@ -1,5 +1,7 @@
 package wci.frontend;
 
+import wci.frontend.pascal.PascalTokenType;
+
 /**
  * <h1>EofToken</h1>
  *
@@ -15,6 +17,11 @@ public class EofToken extends Token
     public EofToken(Source source)
             throws Exception
     {
+        super(source);
+    }
+
+    public EofToken(Source source, PascalTokenType pascalTokenType)
+            throws Exception {
         super(source);
     }
 
