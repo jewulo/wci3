@@ -5,6 +5,13 @@ package wci.frontend.pascal;
  *
  * <p>Pascal translation error codes.</p>
  */
+
+/*
+ * I copied this for the books GitHub repository.
+ * Did not want to risk typos.
+ * Did not want to waste time.
+ */
+
 public enum PascalErrorCode
 {
     ALREADY_FORWARDED("Already specified in FORWARD"),
