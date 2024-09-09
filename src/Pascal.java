@@ -54,6 +54,7 @@ public class Pascal
                 CrossReferencer crossReferencer = new CrossReferencer();
                 crossReferencer.print(symTabStack);
             }
+
             backend.process(iCode, symTabStack);
         }
         catch (Exception ex) {
@@ -94,7 +95,6 @@ public class Pascal
             if (i < args.length) {
                 String path = args[i];
                 new Pascal(operation, path, flags);
-                //Pascal pascal = new Pascal(operation, path, flags);
             }
             else {
                 throw new Exception();

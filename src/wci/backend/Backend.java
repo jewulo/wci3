@@ -18,7 +18,7 @@ public abstract class Backend implements MessageProducer
     protected static MessageHandler messageHandler;
 
     static {
-        symTabStack = new SymTabStackImpl();
+        //symTabStack = new SymTabStackImpl();
         messageHandler = new MessageHandler();
     }
 

@@ -19,7 +19,7 @@ public class MessageHandler
      */
     public MessageHandler()
     {
-        listeners = new ArrayList<MessageListener>();
+        this.listeners = new ArrayList<MessageListener>();
     }
 
     /**
@@ -28,7 +28,7 @@ public class MessageHandler
      */
     public void addListener(MessageListener listener)
     {
-        listeners.add(listener);
+        this.listeners.add(listener);
     }
 
     /**
@@ -37,7 +37,7 @@ public class MessageHandler
      */
     public void removeListener(MessageListener listener)
     {
-        listeners.remove(listener);
+        this.listeners.remove(listener);
     }
 
     /**
@@ -56,7 +56,7 @@ public class MessageHandler
      */
     public void notifyListeners()
     {
-        for (MessageListener listener : listeners) {
+        for (MessageListener listener : this.listeners) {
             listener.messageReceived(message);
         }
     }

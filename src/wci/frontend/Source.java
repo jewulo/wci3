@@ -28,7 +28,7 @@ public class Source implements MessageProducer
     private int lineNum;                            // current source line number
     private int currentPos;                         // current source line position
 
-    private MessageHandler messageHandler; // message handler delegate
+    private MessageHandler messageHandler;          // message handler delegate
 
 
     /**
@@ -173,7 +173,7 @@ public class Source implements MessageProducer
         // Send a source line message containing the line number
         // and the line text to all listeners.
         if (line != null) {
-            sendMessage(new Message(MessageType.SOURCE_LINE,
+            sendMessage(new Message(SOURCE_LINE,
                                     new Object[] {lineNum, line}));
         }
     }

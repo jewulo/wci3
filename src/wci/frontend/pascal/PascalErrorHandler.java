@@ -20,8 +20,8 @@ public class PascalErrorHandler
     /**
      * Flag an error in the source line.
      * @param token the bad token
-     * @param errorCode
-     * @param parser
+     * @param errorCode the error code
+     * @param parser the parser
      */
     public void flag(Token token, PascalErrorCode errorCode, Parser parser)
     {
@@ -49,7 +49,8 @@ public class PascalErrorHandler
         System.exit(errorCode.getStatus());
     }
 
-    public int getErrorCount() {
+    public int getErrorCount()
+    {
         return errorCount;
     }
 }

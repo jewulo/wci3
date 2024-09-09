@@ -80,7 +80,7 @@ public class PascalNumberToken extends PascalToken
         // Is there an exponent part?
         // There cannot be an exponent part if we already saw a ".." token.
         currentChar = currentChar();
-        if (!sawDotDot && ((currentChar != 'E') || (currentChar != 'e'))) {
+        if (!sawDotDot && ((currentChar == 'E') || (currentChar == 'e'))) {
             type = REAL;    // exponent so token type is REAL
             textBuffer.append(currentChar);
             currentChar = nextChar();   // consume 'E' or 'e'

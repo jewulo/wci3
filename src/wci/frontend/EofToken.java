@@ -20,10 +20,12 @@ public class EofToken extends Token
         super(source);
     }
 
+/*
     public EofToken(Source source, PascalTokenType pascalTokenType)
             throws Exception {
         super(source);
     }
+*/
 
     /**
      * Do nothing. Do not consume any source characters.

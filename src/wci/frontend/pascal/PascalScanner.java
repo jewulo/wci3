@@ -42,7 +42,8 @@ public class PascalScanner extends Scanner
         // Construct the next token. The current character determines the
         // token type.
         if (currentChar == EOF) {
-            token = new EofToken(source, END_OF_FILE);
+            //token = new EofToken(source, END_OF_FILE);
+            token = new EofToken(source);
         }
         else if (Character.isLetter(currentChar)) {
             token = new PascalWordToken(source);
