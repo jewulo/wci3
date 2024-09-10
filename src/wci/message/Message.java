@@ -23,11 +23,19 @@ public class Message
         this.body = body;
     }
 
+    /**
+     * Getter.
+     * @return the message body.
+     */
     public Object getBody()
     {
         return body;
     }
 
+    /**
+     * Getter.
+     * @return the message type.
+     */
     public MessageType getType()
     {
         return type;

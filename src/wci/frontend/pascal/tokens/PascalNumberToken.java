@@ -105,7 +105,7 @@ public class PascalNumberToken extends PascalToken
                 //value = Integer.valueOf(integerValue);
             }
         }
-        // Compute the value of an real number token.
+        // Compute the value of a real number token.
         else if (type == REAL) {
             float floatValue = computeFloatValue(wholeDigits, fractionDigits,
                                                 exponentDigits, exponentSign);
