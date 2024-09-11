@@ -29,6 +29,16 @@ public class PascalParserTD extends Parser
         super(scanner);
     }
 
+    /**
+     * Constructor for subclasses.
+     *
+     * @param parent the parent parser.
+     */
+    public PascalParserTD(PascalParserTD parent)
+    {
+        super(parent.getScanner());
+    }
+
     protected static PascalErrorHandler errorHandler = new PascalErrorHandler();
     /**
      * Parse a Pascal source program and generate the symbol
