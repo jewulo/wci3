@@ -1,15 +1,14 @@
 package wci.frontend.pascal;
 
 import wci.frontend.*;
-import wci.intermediate.SymTabEntry;
+import wci.frontend.pascal.parsers.StatementParser;
+import wci.intermediate.ICodeFactory;
+import wci.intermediate.ICodeNode;
 import wci.message.Message;
 
-import static wci.frontend.pascal.PascalErrorCode.IO_ERROR;
-import static wci.frontend.pascal.PascalTokenType.ERROR;
-import static wci.frontend.pascal.PascalTokenType.IDENTIFIER;
+import static wci.frontend.pascal.PascalErrorCode.*;
+import static wci.frontend.pascal.PascalTokenType.*;
 import static wci.message.MessageType.PARSER_SUMMARY;
-import static wci.message.MessageType.TOKEN;
-
 
 
 /**
@@ -40,12 +39,65 @@ public class PascalParserTD extends Parser
     }
 
     protected static PascalErrorHandler errorHandler = new PascalErrorHandler();
+
     /**
      * Parse a Pascal source program and generate the symbol
      * and the intermediate code.
      *
-     * @throws Exception
+     * @throws Exception if an error occurred
      */
+    @Override
+    public void parse()
+            throws Exception
+    {
+        long startTime = System.currentTimeMillis();
+        iCode = ICodeFactory.createICode();
+
+        try {
+            Token token = nextToken();
+            ICodeNode rootNode = null;
+
+            // Look for a BEGIN to parse a compound statement.
+            if (token.getType() == BEGIN) {
+                StatementParser statementParser = new StatementParser(this);
+                rootNode = statementParser.parse(token);
+                token = currentToken();
+            }
+            else  {
+                errorHandler.flag(token, UNEXPECTED_TOKEN, this);
+            }
+
+            // Look for the final period.
+            if (token.getType() != DOT) {
+                errorHandler.flag(token, MISSING_PERIOD, this);
+            }
+            token = currentToken();
+
+            // Set the parse tree root node.
+            if (rootNode != null) {
+                iCode.setRoot(rootNode);
+            }
+
+            // Send the parse summary message.
+            float elaspedTime = (System.currentTimeMillis() - startTime) / 1000f;
+            sendMessage(new Message(PARSER_SUMMARY,
+                                    new Number[] {token.getLineNumber(),
+                                                    getErrorCount(),
+                                                    elaspedTime}));
+        } catch (java.io.IOException e) {
+            errorHandler.abortTranslation(IO_ERROR, this);
+        }
+    }
+/*
+
+    */
+/**
+     * Parse a Pascal source program and generate the symbol
+     * and the intermediate code.
+     *
+     * @throws Exception if an error occurred
+     *//*
+
     @Override
     public void parse()
         throws Exception
@@ -98,6 +150,7 @@ public class PascalParserTD extends Parser
 
     }
 
+*/
     /**
      * Return the number of syntax errors found by the parser.
      * @return the error count.

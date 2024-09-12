@@ -46,6 +46,15 @@ public abstract class Parser implements MessageProducer
 
     /**
      * Getter.
+     * @return the scanner used by this parser.
+     */
+    public Scanner getScanner()
+    {
+        return scanner;
+    }
+
+    /**
+     * Getter.
      * @return the message handler.
      */
     public MessageHandler getMessageHandler()
