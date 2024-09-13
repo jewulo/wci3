@@ -64,7 +64,87 @@ public class ParseTreePrinter
         // Opening tag.
         append(indentation); append("<" + node.toString());
 
+        printAttributes(node);
+        printTypeSpec(node);
+
+        ArrayList<ICodeNode> childNodes = node.getChildren();
+
+        // Print the node's children followd by the closing tag.
+        if ((childNodes != null) && (childNodes.size() > 0)) {
+            append(">");
+            printLine();
+
+            printChildNodes(childNodes);
+            append(indentation); append("</" + node.toString() + ">");
+        }
+        // No children Close off the tag.
+        else {
+            append(" "); append("/>");
+        }
+
+        printLine();
     }
+
+    /**
+     * Print a parse tree node's attributes
+     * @param node the parse tree node.
+     */
+    private void printAttributes(ICodeNodeImpl node) {
+        String saveIndentation = indentation;
+        indentation += indent;
+
+        Set<Map.Entry<ICodeKey, Object>> attributes = node.entrySet();
+        Iterator<Map.Entry<ICodeKey, Object>> it = attributes.iterator();
+
+        // Iterate to print attribute
+        while (it.hasNext()) {
+            Map.Entry<ICodeKey, Object> attribute = it.next();
+            printAttribute(attribute.getKey().toString(),attribute.getValue());
+        }
+
+        indentation = saveIndentation;
+    }
+
+    /**
+     * Print a node attribute as key="value".
+     * @param keyString the key string.
+     * @param value the value
+     */
+    private void printAttribute(String keyString, Object value) {
+        // If the value is a symbol table entry, use the identifiers name.
+        // Else just use the value string.
+        boolean isSymTabEntry = value instanceof SymTabEntry;
+        String valueString = isSymTabEntry ? ((SymTabEntry) value).getName()
+                                           : value.toString();
+
+        String text = keyString.toLowerCase() + "=\"" + valueString + "\"";
+        append(" "); append(text);
+
+        // Include an identifier's nesting level
+        if (isSymTabEntry) {
+            int level = ((SymTabEntry) value).getSymTab().getNestingLevel();
+            printAttribute("LEVEL", level);
+        }
+    }
+
+    /**
+     * Print a parse tree node's child nodes.
+     * @param childNodes the key string.
+     */
+    private void printChildNodes(ArrayList<ICodeNode> childNodes)
+    {
+        String saveIndentation = indentation;
+        indentation += indent;
+
+        for (ICodeNode child : childNodes) {
+            printNode((ICodeNodeImpl) child);
+        }
+
+        indentation = saveIndentation;
+    }
+
+    private void printTypeSpec(ICodeNodeImpl node)
+    {}
 
     /**
      * Append text to the output line.
@@ -101,6 +181,4 @@ public class ParseTreePrinter
             length = 0;
         }
     }
-
-
 }

@@ -7,6 +7,7 @@ import wci.backend.*;
 import wci.message.*;
 import wci.frontend.pascal.PascalTokenType.*;
 import wci.util.CrossReferencer;
+import wci.util.ParseTreePrinter;
 
 import static wci.frontend.pascal.PascalTokenType.*;
 
@@ -56,6 +57,12 @@ public class Pascal
             }
 
             backend.process(iCode, symTabStack);
+
+            if (intermediate) {
+                ParseTreePrinter treePrinter =
+                        new ParseTreePrinter(System.out);
+                treePrinter.print(iCode);
+            }
         }
         catch (Exception ex) {
             System.out.println("***** Internal translator error. *****");
@@ -84,7 +91,7 @@ public class Pascal
             }
 
             int i = 0;
-            String flags = "";
+            String flags = "-i";
 
             // Flags.
             while ((++i < args.length) && (args[i].charAt(0) == '-')) {
