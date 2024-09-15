@@ -38,19 +38,19 @@ public class RuntimeErrorHandler
         String lineNumber = null;
 
         // Look for the ancestor statement node with a line number attribute.
-        while ((node != null && (node.getAttribute(LINE)) == null)) {
+        while ((node != null) && (node.getAttribute(LINE) == null)) {
             node = node.getParent();
         }
 
         // Notify the interpreters listeners
-        assert node != null;
+        //assert node != null;
         backend.sendMessage(
                 new Message(MessageType.RUNTIME_ERROR,
                             new Object[]{errorCode.toString(),
                                         (Integer) node.getAttribute(LINE)}));
 
         if (++errorCount > MAX_ERRORS) {
-            System.out.println("ABORTED AFTER TOO MANY RUNTIME ERRORS.");
+            System.out.println("*** ABORTED AFTER TOO MANY RUNTIME ERRORS.");
             System.exit(-1);
         }
     }

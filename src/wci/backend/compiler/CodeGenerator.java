@@ -20,6 +20,10 @@ public class CodeGenerator extends Backend {
     public void process(ICode iCode, SymTabStack symTabStack)
         throws Exception
     {
+        System.out.println("*** ***");
+        System.out.println("*** CodeGenerator::process ***");
+        System.out.println("*** ***");
+
         long startTime = System.currentTimeMillis();
         float elapsedTime = (System.currentTimeMillis() - startTime)/1000f;
         int instructionCount = 0;

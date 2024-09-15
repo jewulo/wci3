@@ -47,7 +47,6 @@ public class Pascal
             parser.parse();
             source.close();
 
-
             if (parser.getErrorCount() == 0) {
                 iCode = parser.getICode();
                 symTabStack = parser.getSymTabStack();
@@ -142,9 +141,6 @@ public class Pascal
                                                      lineNumber, lineText));
                     break;
                 }
-
-                default:
-                    throw new IllegalStateException("Unexpected value: " + type);
             }
         }
     }
@@ -239,8 +235,6 @@ public class Pascal
                     System.out.println(flagBuffer.toString());
                     break;
                 }
-                default:
-                    throw new IllegalStateException("Unexpected value: " + type);
             }
         }
     }
@@ -273,6 +267,7 @@ public class Pascal
 
             switch (type) {
                 case ASSIGN: {
+
                     if (firstOutputMessage) {
                         System.out.println("\n===== OUTPUT =====\n");
                         firstOutputMessage = false;
@@ -289,6 +284,7 @@ public class Pascal
                 }
 
                 case RUNTIME_ERROR: {
+
                     Object[] body = (Object []) message.getBody() ;
                     String errorMessage = (String) body[0];
                     Integer lineNumber = (Integer) body[1];
@@ -303,6 +299,7 @@ public class Pascal
                 }
 
                 case INTERPRETER_SUMMARY: {
+
                     Number[] body = (Number[]) message.getBody();
                     int executionCount = (Integer) body[0];
                     int runtimeErrors =  (Integer) body[1];
@@ -315,6 +312,7 @@ public class Pascal
                 }
 
                 case COMPILER_SUMMARY: {
+
                     Number[] body = (Number[]) message.getBody();
                     int instructionCount = (Integer) body[0];
                     float elapsedTime = (Float) body[1];
@@ -323,9 +321,6 @@ public class Pascal
                             instructionCount, elapsedTime);
                     break;
                 }
-
-                default:
-                    throw new IllegalStateException("Unexpected value: " + type);
             }
         }
     }

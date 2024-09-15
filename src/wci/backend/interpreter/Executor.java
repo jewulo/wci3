@@ -25,7 +25,10 @@ public class Executor extends Backend
     /**
      * Constructor.
      */
-    public Executor() {}
+    public Executor()
+    {
+        super();
+    }
 
     /**
      * Constructor for subclasses.
@@ -81,18 +84,18 @@ public class Executor extends Backend
     /**
      * @param listener the listener to add.
      */
-    @Override
-    public void addMessageListener(MessageListener listener) {}
+    //@Override
+  //  public void addMessageListener(MessageListener listener) {}
 
     /**
      * @param listener the listener to add.
      */
-    @Override
-    public void removeMessageListener(MessageListener listener) {}
+   // @Override
+    //public void removeMessageListener(MessageListener listener) {}
 
     /**
      * @param message the message to set.
      */
-    @Override
-    public void sendMessage(Message message) {}
+    //@Override
+    //public void sendMessage(Message message) {}
 }

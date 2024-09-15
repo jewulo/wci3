@@ -20,11 +20,9 @@ public class BackendFactory
         throws Exception
     {
         if (operation.equalsIgnoreCase("compile")) {
-            System.out.println("\n\n<<<<<< BackendFactory::Backend() received COMPILE operation: >>>>>>\n");
             return new CodeGenerator();
         }
         else if (operation.equalsIgnoreCase("execute")) {
-            System.out.println("\n\n<<<<<< BackendFactory::Backend() received EXECUTE operation: >>>>>>\n");
             return new Executor();
         }
         else {
