@@ -18,7 +18,7 @@ public abstract class Backend implements MessageProducer
     protected static MessageHandler messageHandler;
 
     static {
-        //symTabStack = new SymTabStackImpl();
+        symTabStack = new SymTabStackImpl();
         messageHandler = new MessageHandler();
     }
 
@@ -31,6 +31,15 @@ public abstract class Backend implements MessageProducer
     public ICode getICode()
     {
         return iCode;
+    }
+
+    /**
+     * Getter.
+     * @return the symbol table stack.
+     */
+    public SymTabStack getSymTabStack()
+    {
+        return symTabStack;
     }
 
     /**

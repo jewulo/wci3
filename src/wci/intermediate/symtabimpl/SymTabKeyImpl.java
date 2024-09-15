@@ -7,7 +7,7 @@ import wci.intermediate.SymTabKey;
  *
  * <p>Attribute keys for a symbol table entry.</p>
  */
-public enum SymTabKeyImpl
+public enum SymTabKeyImpl implements SymTabKey
 {
     // Constant.
     CONSTANT_VALUE,

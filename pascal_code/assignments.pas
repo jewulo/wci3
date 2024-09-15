@@ -1,7 +1,7 @@
 BEGIN
     BEGIN {Temprature conversions.}
     
-        five := -1 + 2 - 3 + 4 +3;
+        five := -1 + 2 - 3 + 4 + 3;
         ratio := five/9.0;
 
         fahrenheit := 72;

@@ -90,13 +90,14 @@ public class PascalParserTD extends Parser
     }
 /*
 
-    */
-/**
+
+    /**
      * Parse a Pascal source program and generate the symbol
      * and the intermediate code.
      *
      * @throws Exception if an error occurred
-     *//*
+     */
+    /*
 
     @Override
     public void parse()

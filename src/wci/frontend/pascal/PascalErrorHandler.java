@@ -37,6 +37,11 @@ public class PascalErrorHandler
         }
     }
 
+    /**
+     * Abort the translation.
+     * @param errorCode the error code.
+     * @param parser the parser.
+     */
     public void abortTranslation(PascalErrorCode errorCode, Parser parser)
     {
         // Notify the parser's listeners and then abort.
@@ -49,6 +54,10 @@ public class PascalErrorHandler
         System.exit(errorCode.getStatus());
     }
 
+    /**
+     * Getter.
+     * @return the syntax error count.
+     */
     public int getErrorCount()
     {
         return errorCount;
