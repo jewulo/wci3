@@ -23,7 +23,7 @@ public enum PascalTokenType implements TokenType
     DOT("."), COMMA(","), SEMICOLON(";"), COLON(":"), QUOTE("'"),
     EQUALS("="), NOT_EQUALS("<>"), LESS_THAN("<"), LESS_EQUALS("<="),
     GREATER_EQUALS(">="), GREATER_THAN(">"), LEFT_PAREN("("), RIGHT_PAREN(")"),
-    LEFT_BRACKET("["), RIGHTH_BRACKET("]"), LEFT_BRACE("{"), RIGHT_BRACE("}"),
+    LEFT_BRACKET("["), RIGHT_BRACKET("]"), LEFT_BRACE("{"), RIGHT_BRACE("}"),
     UP_ARROW("^"), DOT_DOT(".."),
 
     IDENTIFIER, INTEGER, REAL, STRING,

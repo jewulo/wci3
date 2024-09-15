@@ -14,9 +14,8 @@ BEGIN
         fahrenheit := 32 + centigrade/ratio;
     END;
 
-        {Runtime division by zero error.}
-
-        dze := fahrenheit/(ratio - ratio);
+    {Runtime division by zero error.}
+    dze := fahrenheit/(ratio - ratio);
 
     BEGIN {Calculate a square root using Newton's Method.}
         number := 2;
@@ -28,7 +27,6 @@ BEGIN
         root := (number/root + root)/2;
     END;
     
-
     ch := 'x';
     str := 'hello world'
 

@@ -10,12 +10,19 @@ import wci.frontend.pascal.PascalTokenType;
 import wci.intermediate.ICodeFactory;
 import wci.intermediate.ICodeNode;
 
+import java.util.EnumSet;
+
 import static wci.frontend.pascal.PascalErrorCode.MISSING_SEMICOLON;
 import static wci.frontend.pascal.PascalErrorCode.UNEXPECTED_TOKEN;
-import static wci.frontend.pascal.PascalTokenType.IDENTIFIER;
-import static wci.frontend.pascal.PascalTokenType.SEMICOLON;
+import static wci.frontend.pascal.PascalTokenType.*;
 import static wci.intermediate.icodeimpl.ICodeKeyImpl.LINE;
 import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.NO_OP;
+
+/**
+ * <h1>StatementParser</h1>
+ *
+ * <p>Parse a Pascal statement.</p>
+ */
 
 public class StatementParser extends PascalParserTD
 {
@@ -27,6 +34,15 @@ public class StatementParser extends PascalParserTD
     {
         super(parent);
     }
+
+    // Synchronisation set for starting a statement.
+    protected static final EnumSet<PascalTokenType> STMT_START_SET =
+        EnumSet.of(BEGIN, CASE, FOR, PascalTokenType.IF, REPEAT, WHILE,
+                IDENTIFIER, SEMICOLON);
+
+    // Synchronisation set for following a statement.
+    protected static final EnumSet<PascalTokenType> STMT_FOLLOW_SET =
+        EnumSet.of(SEMICOLON, END, ELSE, UNTIL, DOT);
 
     /**
      * Parse a statement.
@@ -42,17 +58,46 @@ public class StatementParser extends PascalParserTD
 
         switch ((PascalTokenType) token.getType()) {
             case BEGIN: {
-                CompoundStatementParser compoundParser =
-                    new CompoundStatementParser(this);
+                CompoundStatementParser compoundParser = new CompoundStatementParser(this);
                 statementNode = compoundParser.parse(token);
                 break;
             }
 
             // An assignment statement begins with a variable's identifier.
             case IDENTIFIER: {
-                AssignmentStatementParser assignmentParser =
-                    new AssignmentStatementParser(this);
+                AssignmentStatementParser assignmentParser = new AssignmentStatementParser(this);
                 statementNode = assignmentParser.parse(token);
+                break;
+            }
+
+            case REPEAT: {
+                RepeatStatementParser repeatParser = new RepeatStatementParser(this);
+                statementNode = repeatParser.parse(token);
+
+                break;
+            }
+
+            case WHILE: {
+                WhileStatementParser whileParser = new WhileStatementParser(this);
+                statementNode = whileParser.parse(token);
+                break;
+            }
+
+            case FOR: {
+                ForStatementParser forParser = new ForStatementParser(this);
+                statementNode = forParser.parse(token);
+                break;
+            }
+
+            case IF: {
+                IfStatementParser ifParser = new IfStatementParser(this);
+                statementNode = ifParser.parse(token);
+                break;
+            }
+
+            case CASE: {
+                CaseStatementParser caseParser = new CaseStatementParser(this);
+                statementNode = caseParser.parse(token);
                 break;
             }
 
@@ -81,6 +126,10 @@ public class StatementParser extends PascalParserTD
                              PascalErrorCode errorCode)
         throws Exception
     {
+        // Synchronisation set for the terminator.
+        EnumSet<PascalTokenType> terminatorSet = STMT_START_SET.clone();
+        terminatorSet.add(terminator);
+
         // Loop to parse each statement until the END token.
         // or the end of the source file.
         while (!(token instanceof EofToken) &&
@@ -98,17 +147,13 @@ public class StatementParser extends PascalParserTD
                 token = nextToken();    // consume the ;
             }
 
-            // If at the start of the next assignment statement,
-            // then missing a semicolon.
-            else if (tokenType == IDENTIFIER) {
+            // If at the start of the next statement, then missing a semicolon.
+            else if (STMT_START_SET.contains(tokenType)) {
                 errorHandler.flag(token, MISSING_SEMICOLON, this);
             }
 
-            // Unexpected token.
-            else if (tokenType != terminator) {
-                errorHandler.flag(token, UNEXPECTED_TOKEN, this);
-                token = nextToken();    // consume the unexpected token
-            }
+            // Synchronise at the start of the next statement or at the terminator.
+            token = synchronize(terminatorSet);
         }
 
         // Look for the terminator token.
@@ -118,7 +163,6 @@ public class StatementParser extends PascalParserTD
         else {
             errorHandler.flag(token, errorCode, this);
         }
-
     }
 
     /**
@@ -132,21 +176,5 @@ public class StatementParser extends PascalParserTD
         if (node != null) {
             node.setAttribute(LINE, token.getLineNumber());
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    @Override
-    public void parse() throws Exception {
-
-    }
-
-    /**
-     * @return
-     */
-    @Override
-    public int getErrorCount() {
-        return 0;
     }
 }

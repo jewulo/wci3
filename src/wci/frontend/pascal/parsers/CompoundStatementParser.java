@@ -16,6 +16,7 @@ import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
 public class CompoundStatementParser extends StatementParser {
     /**
      * Constructor.
+     *
      * @param parent
      */
     public CompoundStatementParser(PascalParserTD parent)

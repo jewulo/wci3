@@ -22,15 +22,26 @@ import static wci.intermediate.icodeimpl.ICodeKeyImpl.ID;
 import static wci.intermediate.icodeimpl.ICodeKeyImpl.VALUE;
 import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
 
+/**
+ * <h1>ExpressionParser</h1>
+ *
+ * <p>Parse a Pascal EXPRESSION.</p>
+ */
 public class ExpressionParser extends PascalParserTD
 {
     /**
      * Constructor.
+     *
      * @param parent the parent parser
      */
     public ExpressionParser(PascalParserTD parent) {
         super(parent);
     }
+
+    // Synchronisation set for starting an expression.
+    static final EnumSet<PascalTokenType> EXPR_START_SET =
+        EnumSet.of(PLUS, MINUS, IDENTIFIER, INTEGER, REAL, STRING,
+                   PascalTokenType.NOT, LEFT_PAREN);
 
     /**
      * Parse an expression
