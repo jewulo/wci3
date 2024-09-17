@@ -13,7 +13,7 @@ BEGIN {REPEAT statements.}
 
         REPEAT
             partialnum := number/root + root;
-            root := partialnum/2
+            root := partialnum/2;
         UNTIL root*root - number < 0.000001
     END
 END.
