@@ -28,6 +28,6 @@ BEGIN
     END;
     
     ch := 'x';
-    str := 'hello world'
+    str := 'hello world';
 
 END.

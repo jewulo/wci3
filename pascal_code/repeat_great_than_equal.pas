@@ -4,7 +4,7 @@ BEGIN {REPEAT statements.}
     REPEAT
         j := i;
         k := i;
-    UNTIL i <= j;
+    UNTIL i >= j;
 
     BEGIN {Calculate a square root using Newton's method.}
         number := 4;

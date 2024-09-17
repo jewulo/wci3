@@ -1,4 +1,4 @@
-BEGIN {REPEAT statements.}
+ BEGIN {REPEAT statements.}
     i := 0;
 
     REPEAT

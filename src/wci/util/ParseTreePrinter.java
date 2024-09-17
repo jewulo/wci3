@@ -99,7 +99,7 @@ public class ParseTreePrinter
         // Iterate to print attribute
         while (it.hasNext()) {
             Map.Entry<ICodeKey, Object> attribute = it.next();
-            printAttribute(attribute.getKey().toString(),attribute.getValue());
+            printAttribute(attribute.getKey().toString(), attribute.getValue());
         }
 
         indentation = saveIndentation;
