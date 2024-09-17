@@ -27,6 +27,7 @@ public class StatementExecutor extends Executor
 
     /**
      * Execute a statement.
+     * To be overridden by the specialized statement executor subclasses.
      * @param node the root node of the statement.
      * @return null. Statements have no return value.
      */
@@ -47,6 +48,21 @@ public class StatementExecutor extends Executor
             case ASSIGN: {
                 AssignmentExecutor assignmentExecutor = new AssignmentExecutor(this);
                 return assignmentExecutor.execute(node);
+            }
+            case LOOP: {
+                LoopExecutor loopExecutor = new LoopExecutor(this);
+                return loopExecutor.execute(node);
+            }
+
+            case IF: {
+                IfExecutor ifExecutor = new IfExecutor(this);
+                return ifExecutor.execute(node);
+            }
+
+            case SELECT: {
+                // SelectExecutor selectExecutor = new SelectExecutor(this);
+                SelectExecutorOptimized selectExecutor = new SelectExecutorOptimized(this);
+                return selectExecutor.execute(node);
             }
 
             case NO_OP: return null;
