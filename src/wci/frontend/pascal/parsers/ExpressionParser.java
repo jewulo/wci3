@@ -67,6 +67,7 @@ public class ExpressionParser extends PascalParserTD
         REL_OPS_MAP.put(EQUALS, EQ);
         REL_OPS_MAP.put(NOT_EQUALS, NE);
         REL_OPS_MAP.put(LESS_THAN, LT);
+        REL_OPS_MAP.put(LESS_EQUALS, LE);
         REL_OPS_MAP.put(GREATER_THAN, GT);
         REL_OPS_MAP.put(GREATER_EQUALS, GE);
     }

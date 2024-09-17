@@ -5,6 +5,9 @@ BEGIN {IF statements}
              ELSE f := -200;
 
     IF i < j THEN t := 300;
+    IF i <= j THEN t := 300;
+    IF i > j THEN t := 300;
+    IF i >= j THEN t := 300;
 
     {Cascading IF THEN ELSEs.}
     IF      i = 1 THEN f := 10
