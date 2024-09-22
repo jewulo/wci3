@@ -9,7 +9,7 @@ public interface TypeSpec
 {
     /**
      * Getter
-     * @return the type fprm.
+     * @return the type form.
      */
     public TypeForm getForm();
 

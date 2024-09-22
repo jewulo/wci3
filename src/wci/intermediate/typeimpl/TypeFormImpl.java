@@ -12,7 +12,8 @@ public enum TypeFormImpl implements TypeForm
     SCALAR, ENUMERATION, SUBRANGE, ARRAY, RECORD;
 
     @Override
-    public String toString() {
+    public String toString()
+    {
         return super.toString().toLowerCase();
     }
 }

@@ -77,7 +77,7 @@ public class TypeSpecImpl
     @Override
     public SymTabEntry getIdentifier()
     {
-        return null;
+        return identifier;
     }
 
     /**

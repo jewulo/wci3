@@ -24,7 +24,7 @@ public class TypeFactory
      * @param value the string value.
      * @return the type specification
      */
-    public static  TypeSpec createStringType(String value)
+    public static TypeSpec createStringType(String value)
     {
         return new TypeSpecImpl(value);
     }
