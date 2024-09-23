@@ -21,7 +21,8 @@ import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
  * <p>Parse a Pascal FOR statement.</p>
  */
 
-public class ForStatementParser extends StatementParser {
+public class ForStatementParser extends StatementParser
+{
     /**
      * Constructor.
      *

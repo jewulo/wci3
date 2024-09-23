@@ -86,24 +86,6 @@ public class PascalParserTD extends Parser
             iCode.setRoot(rootNode);
             symTabStack.pop();
 
-            /*
-            // Look for a BEGIN to parse a compound statement.
-            if (token.getType() == BEGIN) {
-                StatementParser statementParser = new StatementParser(this);
-                rootNode = statementParser.parse(token);
-                token = currentToken();
-            }
-            else  {
-                errorHandler.flag(token, UNEXPECTED_TOKEN, this);
-            }
-
-            // Set the parse tree root node.
-            if (rootNode != null) {
-                iCode.setRoot(rootNode);
-            }
-
-            */
-
             // Look for the final period.
             token = currentToken();
             if (token.getType() != DOT) {

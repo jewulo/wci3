@@ -2,7 +2,13 @@ package wci.frontend.pascal.parsers;
 
 import wci.frontend.Token;
 
-public class TypeDefinitionsParser {
+/**
+ * <h1>TypeDefinitionsParser</h1>
+ *
+ * <p>Parse Pascal Type Definitions.</p>
+ */
+public class TypeDefinitionsParser
+{
     public TypeDefinitionsParser(DeclarationsParser declarationsParser) {
     }
 

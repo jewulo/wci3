@@ -22,7 +22,8 @@ import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
  * <p>Parse a Pascal CASE statement.</p>
  */
 
-public class CaseStatementParser extends StatementParser {
+public class CaseStatementParser extends StatementParser
+{
     /**
      * Constructor.
      *

@@ -13,7 +13,8 @@ import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
  *
  * <p>Parse a Pascal compound statement.</p>
  */
-public class CompoundStatementParser extends StatementParser {
+public class CompoundStatementParser extends StatementParser
+{
     /**
      * Constructor.
      *

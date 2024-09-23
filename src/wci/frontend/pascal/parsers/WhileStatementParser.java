@@ -20,7 +20,8 @@ import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.TEST;
  *
  * <p>Parse a Pascal WHILE statement.</p>
  */
-public class WhileStatementParser extends StatementParser {
+public class WhileStatementParser extends StatementParser
+{
     /**
      * Constructor.
      *

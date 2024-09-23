@@ -3,7 +3,8 @@ package wci.frontend.pascal.parsers;
 import wci.frontend.Token;
 import wci.intermediate.symtabimpl.DefinitionImpl;
 
-public class VariableDefinitionsParser {
+public class VariableDefinitionsParser
+{
     public VariableDefinitionsParser(DeclarationsParser declarationsParser) {
     }
 

@@ -23,7 +23,8 @@ import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.VARIABLE;
  * <p>Parse a Pascal ASSIGNMENT statement.</p>
  */
 
-public class AssignmentStatementParser extends StatementParser {
+public class AssignmentStatementParser extends StatementParser
+{
     /**
      * Constructor.
      *

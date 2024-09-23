@@ -19,7 +19,8 @@ import static wci.frontend.pascal.PascalTokenType.THEN;
  * <p>Parse a Pascal IF statement.</p>
  */
 
-public class IfStatementParser extends StatementParser {
+public class IfStatementParser extends StatementParser
+{
     /**
      * Constructor.
      *

@@ -16,7 +16,8 @@ import static wci.intermediate.symtabimpl.DefinitionImpl.VARIABLE;
  *
  * <p>Parse Pascal declarations.</p>
  */
-public class DeclarationsParser extends PascalParserTD {
+public class DeclarationsParser extends PascalParserTD
+{
     /**
      * Constructor
      * @param parent the parent parser.
