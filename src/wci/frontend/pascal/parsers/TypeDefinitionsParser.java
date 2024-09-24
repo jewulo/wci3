@@ -1,14 +1,18 @@
 package wci.frontend.pascal.parsers;
 
 import wci.frontend.Token;
+import wci.frontend.TokenType;
 import wci.frontend.pascal.PascalErrorCode;
 import wci.frontend.pascal.PascalParserTD;
 import wci.frontend.pascal.PascalTokenType;
 import wci.intermediate.SymTabEntry;
+import wci.intermediate.TypeSpec;
 
 import java.util.EnumSet;
 
+import static wci.frontend.pascal.PascalErrorCode.*;
 import static wci.frontend.pascal.PascalTokenType.*;
+import static wci.intermediate.symtabimpl.DefinitionImpl.TYPE;
 
 /**
  * <h1>TypeDefinitionsParser</h1>
@@ -18,7 +22,7 @@ import static wci.frontend.pascal.PascalTokenType.*;
 public class TypeDefinitionsParser extends DeclarationsParser
 {
     /**
-     * <h1>TypeDefinitionsParser</h1>
+     * <h1>Constructor</h1>
      *
      * <p>Parse Pascal type definitions.</p>
      * @param parent
@@ -78,13 +82,56 @@ public class TypeDefinitionsParser extends DeclarationsParser
                 typeId.appendLineNumber(token.getLineNumber());
             }
             else {
-                errorHandler.flag(token, PascalErrorCode.IDENTIFIER_REDEFINED, this);
+                errorHandler.flag(token, IDENTIFIER_REDEFINED, this);
                 typeId = null;
             }
 
             token = nextToken();    // consume the identifier token
 
             // Synchronize on the = token.
+            token = synchronize(EQUALS_SET);
+            if (token.getType() == EQUALS) {
+                token = nextToken();    // consume the =
+            }
+            else {
+                errorHandler.flag(token, MISSING_EQUALS, this);
+            }
+
+            // Parse the type specification.
+            TypeSpecificationParser typeSpecificationParser =
+                new TypeSpecificationParser(this);
+            TypeSpec type = typeSpecificationParser.parse(token);
+
+            // Set identifier to be a type and set its type specification.
+            if (typeId != null) {
+                typeId.setDefinition(TYPE);
+            }
+
+            // Cross-link the type identifier and the type specification.
+            if ((type != null) && (typeId != null)) {
+                if (type.getIdentifier() == null) {
+                    type.setIdentifier(typeId);
+                }
+                typeId.setTypeSpec(type);
+            }
+            else {
+                token = synchronize(FOLLOW_SET);
+            }
+
+            token = currentToken();
+            TokenType tokenType = token.getType();
+
+            // Look for one of more semicolons after a definition.
+            if (tokenType == SEMICOLON) {
+                while (token.getType() == SEMICOLON) {
+                    token = nextToken();    // consume ;
+                }
+            }
+            else if (NEXT_START_SET.contains(tokenType)) {
+                errorHandler.flag(token, MISSING_SEMICOLON, this);
+            }
+
+            token = synchronize(IDENTIFIER_SET);
         }
     }
 }
