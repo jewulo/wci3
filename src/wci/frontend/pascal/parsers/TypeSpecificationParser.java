@@ -17,7 +17,7 @@ import static wci.frontend.pascal.PascalTokenType.SEMICOLON;
 public class TypeSpecificationParser extends PascalParserTD {
     /**
      * Constructor.
-     * @param parent
+     * @param parent the parent parser
      */
     public TypeSpecificationParser(PascalParserTD parent)
     {
@@ -31,7 +31,6 @@ public class TypeSpecificationParser extends PascalParserTD {
         TYPE_START_SET.add(PascalTokenType.ARRAY);
         TYPE_START_SET.add(PascalTokenType.RECORD);
         TYPE_START_SET.add(SEMICOLON);
-
     }
 
     /**
