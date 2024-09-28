@@ -93,7 +93,7 @@ public class SimpleTypeParser extends TypeSpecificationParser {
                 return enumerationTypeParser.parse(token);
             }
 
-            case COMMA: {}
+            case COMMA:
             case SEMICOLON: {
                 errorHandler.flag(token, PascalErrorCode.INVALID_TYPE, this);
                 return null;
@@ -106,7 +106,4 @@ public class SimpleTypeParser extends TypeSpecificationParser {
             }
         }
     }
-
-
-
 }

@@ -142,7 +142,7 @@ public class ConstantDefinitionsParser extends DeclarationsParser
      * @return the constant value.
      * @throws Exception if an error occurred.
      */
-    private Object parseConstant(Token token)
+    public Object parseConstant(Token token)
         throws Exception
     {
         TokenType sign = null;
