@@ -19,8 +19,8 @@ import static wci.intermediate.typeimpl.TypeKeyImpl.*;
  *
  * <p>Parse a Pascal subrange type specification.</p>
  */
-public class SubrangeTypeParser extends TypeSpecificationParser {
-
+public class SubrangeTypeParser extends TypeSpecificationParser
+{
     /**
      * Constructor.
      * @param parent the parent parser
