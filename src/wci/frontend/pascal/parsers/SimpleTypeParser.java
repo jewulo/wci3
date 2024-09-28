@@ -20,8 +20,8 @@ import static wci.intermediate.symtabimpl.DefinitionImpl.ENUMERATION_CONSTANT;
  *
  * <p>Parse a simple Pascal type (identifier, subrange, enumeration)</p>
  */
-public class SimpleTypeParser extends TypeSpecificationParser {
-
+public class SimpleTypeParser extends TypeSpecificationParser
+{
     // Synchronisation set for starting a simple type specification.
     static final EnumSet<PascalTokenType> SIMPLE_TYPE_START_SET =
         ConstantDefinitionsParser.CONSTANT_START_SET.clone();

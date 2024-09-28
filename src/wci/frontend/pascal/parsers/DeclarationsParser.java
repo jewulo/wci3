@@ -62,6 +62,7 @@ public class DeclarationsParser extends PascalParserTD
 
     /**
      * Parse constant declarations.
+     * To be overridden by the specialised declarations parser subclasses.
      * @param token the initial token.
      * @throws Exception
      */
@@ -92,10 +93,11 @@ public class DeclarationsParser extends PascalParserTD
 
         if (token.getType() == VAR) {
             token = nextToken();    // consume VAR
-            VariableDefinitionsParser variableDefinitionsParser =
-                new VariableDefinitionsParser(this);
-            variableDefinitionsParser.setDefinition(VARIABLE);
-            variableDefinitionsParser.parse(token);
+
+            VariableDeclarationsParser variableDeclarationsParser =
+                new VariableDeclarationsParser(this);
+            variableDeclarationsParser.setDefinition(VARIABLE);
+            variableDeclarationsParser.parse(token);
         }
 
         token = synchronize(ROUTINE_START_SET);

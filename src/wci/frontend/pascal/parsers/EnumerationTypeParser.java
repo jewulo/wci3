@@ -18,7 +18,8 @@ import static wci.intermediate.symtabimpl.SymTabKeyImpl.CONSTANT_VALUE;
 import static wci.intermediate.typeimpl.TypeFormImpl.ENUMERATION;
 import static wci.intermediate.typeimpl.TypeKeyImpl.ENUMERATION_CONSTANTS;
 
-public class EnumerationTypeParser extends TypeSpecificationParser {
+public class EnumerationTypeParser extends TypeSpecificationParser
+{
     /**
      * Constructor.
      * @param parent the parent parser

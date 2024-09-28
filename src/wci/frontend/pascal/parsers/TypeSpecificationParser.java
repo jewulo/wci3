@@ -14,7 +14,8 @@ import static wci.frontend.pascal.PascalTokenType.SEMICOLON;
  *
  * <p>Parse Pascal Type Specification.</p>
  */
-public class TypeSpecificationParser extends PascalParserTD {
+public class TypeSpecificationParser extends PascalParserTD
+{
     /**
      * Constructor.
      * @param parent the parent parser

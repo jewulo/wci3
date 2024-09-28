@@ -9,6 +9,7 @@ import wci.util.CrossReferencer;
 import wci.util.ParseTreePrinter;
 
 import static wci.frontend.pascal.PascalTokenType.*;
+import static wci.intermediate.symtabimpl.SymTabKeyImpl.ROUTINE_ICODE;
 
 /**
  * <h1>Pascal</h1>
@@ -48,8 +49,10 @@ public class Pascal
             source.close();
 
             if (parser.getErrorCount() == 0) {
-                iCode = parser.getICode();
                 symTabStack = parser.getSymTabStack();
+
+                SymTabEntry programId = symTabStack.getProgramId();
+                iCode = (ICode) programId.getAttribute(ROUTINE_ICODE);
 
                 if (xref) {
                     CrossReferencer crossReferencer = new CrossReferencer();
@@ -59,7 +62,7 @@ public class Pascal
                 if (intermediate) {
                     ParseTreePrinter treePrinter =
                             new ParseTreePrinter(System.out);
-                    treePrinter.print(iCode);
+                    treePrinter.print(symTabStack);
                 }
 
                 backend.process(iCode, symTabStack);
@@ -95,7 +98,7 @@ public class Pascal
             }
 
             int i = 0;
-            String flags = "-i";
+            String flags = "-x";
 
             // Flags.
             while ((++i < args.length) && (args[i].charAt(0) == '-')) {

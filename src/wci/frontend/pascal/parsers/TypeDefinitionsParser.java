@@ -73,7 +73,8 @@ public class TypeDefinitionsParser extends DeclarationsParser
         // separated by semicolons.
         while (token.getType() == IDENTIFIER) {
             String name = token.getText().toLowerCase();
-            SymTabEntry typeId = getSymTabStack().lookupLocal(name);
+            //SymTabEntry typeId = getSymTabStack().lookupLocal(name);
+            SymTabEntry typeId = symTabStack.lookupLocal(name);
 
             // Enter new identifier into the symbol table
             // but don't set how it's defined yet.
