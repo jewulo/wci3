@@ -19,7 +19,8 @@ public class ICodeNodeImpl
 {
     private ICodeNodeType           type;       // node type
     private ICodeNode               parent;     // parent node
-    private ArrayList<ICodeNode>    children; // children array list
+    private ArrayList<ICodeNode>    children;   // children array list
+    private TypeSpec                typeSpec;   // data type specification
 
     /**
      * Constructor.
@@ -121,6 +122,28 @@ public class ICodeNodeImpl
         }
 
         return copy;
+    }
+
+    /**
+     * Set the type specification of this node.
+     *
+     * @param typeSpec the type specification of this node
+     */
+    @Override
+    public void setTypeSpec(TypeSpec typeSpec)
+    {
+        this.typeSpec = typeSpec;
+    }
+
+    /**
+     * Return the type specification of this node.
+     *
+     * @return the type specification.
+     */
+    @Override
+    public TypeSpec getTypeSpec()
+    {
+        return typeSpec;
     }
 
     @Override
