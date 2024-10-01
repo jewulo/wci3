@@ -63,7 +63,7 @@ public class TypeChecker
      * @param type2 the second specification to check.
      * @return true if at least one is real, else false.
      */
-    public static boolean isAtLeastOneREal(TypeSpec type1, TypeSpec type2)
+    public static boolean isAtLeastOneReal(TypeSpec type1, TypeSpec type2)
     {
         return  (isReal(type1) && isReal(type2)) ||
                 (isReal(type1) && isInteger(type2)) ||
@@ -151,7 +151,7 @@ public class TypeChecker
             compatible = true;
         }
         // One integer and one real.
-        else if (isAtLeastOneREal(type1, type2)) {
+        else if (isAtLeastOneReal(type1, type2)) {
             compatible = true;
         }
         // Two strings.
