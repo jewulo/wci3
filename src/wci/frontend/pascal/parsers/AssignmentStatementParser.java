@@ -7,9 +7,13 @@ import wci.frontend.pascal.PascalTokenType;
 import wci.intermediate.ICodeFactory;
 import wci.intermediate.ICodeNode;
 import wci.intermediate.SymTabEntry;
+import wci.intermediate.TypeSpec;
+import wci.intermediate.symtabimpl.Predefined;
+import wci.intermediate.typeimpl.TypeChecker;
 
 import java.util.EnumSet;
 
+import static wci.frontend.pascal.PascalErrorCode.INCOMPATIBLE_TYPES;
 import static wci.frontend.pascal.PascalErrorCode.MISSING_COLON_EQUALS;
 import static wci.frontend.pascal.PascalTokenType.COLON;
 import static wci.frontend.pascal.PascalTokenType.COLON_EQUALS;
@@ -47,8 +51,51 @@ public class AssignmentStatementParser extends StatementParser
      * Parse an assignment statement.
      * @param token the initial token.
      * @return the root node of the generated parse tree.
+     * @return intermediate info containing the root node of the
+     * generated parse tree and type specification.
      * @throws Exception if an error occurred.
      */
+    public ICodeNode parse(Token token)
+            throws Exception
+    {
+        // Create the ASSIGN node.
+        ICodeNode assignNode = ICodeFactory.createICodeNode(ASSIGN);
+
+        // Parse the target variable.
+        VariableParser variableParser = new VariableParser(this);
+        ICodeNode targetNode = variableParser.parse(token);
+        TypeSpec targetType = targetNode != null ? targetNode.getTypeSpec()
+                                                 : Predefined.undefinedType;
+
+        // The ASSIGN node adopts the variable node as its first child.
+        assignNode.addChild(targetNode);
+
+        // Synchronise on the := token.
+        token = synchronize(COLON_EQUALS_SET);
+        if (token.getType() == COLON_EQUALS) {
+            token = nextToken();    // consume the :=
+        }
+        else {
+            errorHandler.flag(token, MISSING_COLON_EQUALS, this);
+        }
+
+        // Parse the expression. The ASSIGN node adopts the expression's
+        // node as its second child.
+        ExpressionParser expressionParser = new ExpressionParser(this);
+        ICodeNode exprNode = expressionParser.parse(token);
+        assignNode.addChild(exprNode);
+
+        // Type check: Assignment compatible?
+        TypeSpec exprType = exprNode != null ? exprNode.getTypeSpec()
+                                             : Predefined.undefinedType;
+        if (!TypeChecker.areAssignmentCompatible(targetType, exprType)) {
+            errorHandler.flag(token, INCOMPATIBLE_TYPES, this);
+        }
+
+        assignNode.setTypeSpec(targetType);
+        return assignNode;
+    }
+/*
     public ICodeNode parse(Token token)
         throws Exception
     {
@@ -89,4 +136,5 @@ public class AssignmentStatementParser extends StatementParser
 
         return assignNode;
     }
+*/
 }
