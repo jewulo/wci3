@@ -2,6 +2,7 @@ package wci.frontend.pascal;
 
 import wci.frontend.*;
 import wci.frontend.pascal.parsers.BlockParser;
+import wci.frontend.pascal.parsers.ProgramParser;
 import wci.frontend.pascal.parsers.StatementParser;
 import wci.intermediate.ICode;
 import wci.intermediate.ICodeFactory;
@@ -54,9 +55,45 @@ public class PascalParserTD extends Parser
     /**
      * Parse a Pascal source program and generate the symbol
      * and the intermediate code.
-     *
      * @throws Exception if an error occurred
      */
+    @Override
+    public void parse()
+            throws Exception
+    {
+        long startTime = System.currentTimeMillis();
+        Predefined.initialize(symTabStack);
+
+        try {
+            Token token = nextToken();
+
+            // Parse a program.
+            ProgramParser programParser = new ProgramParser(this);
+            programParser.parse(token, null);
+            token = currentToken();
+
+            // Send the parser summary message.
+            float elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0f;
+            sendMessage(new Message(PARSER_SUMMARY,
+                    new Number[] {token.getLineNumber(),
+                                  getErrorCount(),
+                                  elapsedTime}));
+        }
+        catch (java.io.IOException ex) {
+            errorHandler.abortTranslation(IO_ERROR, this);
+        }
+    }
+
+/*
+
+    */
+/**
+     * Parse a Pascal source program and generate the symbol
+     * and the intermediate code.
+     *
+     * @throws Exception if an error occurred
+     *//*
+
     @Override
     public void parse()
             throws Exception
@@ -105,6 +142,7 @@ public class PascalParserTD extends Parser
         }
     }
 
+*/
     /**
      * Return the number of syntax errors found by the parser.
      * @return the error count.

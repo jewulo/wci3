@@ -64,9 +64,11 @@ public class DeclarationsParser extends PascalParserTD
      * Parse constant declarations.
      * To be overridden by the specialised declarations parser subclasses.
      * @param token the initial token.
+     * @param parentId the symbol table entry of the parent routine's name.
+     * @return null.
      * @throws Exception
      */
-    public void parse(Token token)
+    public SymTabEntry parse(Token token, SymTabEntry parentId)
         throws Exception
     {
         token = synchronize(DECLARATION_START_SET);
@@ -101,5 +103,27 @@ public class DeclarationsParser extends PascalParserTD
         }
 
         token = synchronize(ROUTINE_START_SET);
+        TokenType tokenType = token.getType();
+
+        // look for procedures and functions and parse them to create
+        // types of class DeclaredRoutineParser.
+        while ((tokenType == PROCEDURE) || (tokenType == FUNCTION)) {
+            DeclaredRoutineParser routineParser =
+                new DeclaredRoutineParser(this);
+            routineParser.parse(token, parentId);
+
+            // Look for one or more semicolons after a definition.
+            token = currentToken();
+            if (token.getType() == SEMICOLON) {
+                while (token.getType() == SEMICOLON) {
+                    token = nextToken();    // consume the ;
+                }
+            }
+
+            token = synchronize(ROUTINE_START_SET);
+            tokenType = tokenType = token.getType();
+        }
+
+        return null;
     }
 }
