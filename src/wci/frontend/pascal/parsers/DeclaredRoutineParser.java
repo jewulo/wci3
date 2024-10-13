@@ -7,11 +7,12 @@ import wci.frontend.pascal.PascalParserTD;
 import wci.frontend.pascal.PascalTokenType;
 import wci.intermediate.*;
 import wci.intermediate.symtabimpl.DefinitionImpl;
+import wci.intermediate.symtabimpl.Predefined;
+import wci.intermediate.typeimpl.TypeFormImpl;
 
 import java.util.ArrayList;
 
-import static wci.frontend.pascal.PascalErrorCode.ALREADY_FORWARDED;
-import static wci.frontend.pascal.PascalErrorCode.MISSING_SEMICOLON;
+import static wci.frontend.pascal.PascalErrorCode.*;
 import static wci.frontend.pascal.PascalTokenType.IDENTIFIER;
 import static wci.frontend.pascal.PascalTokenType.SEMICOLON;
 import static wci.intermediate.symtabimpl.RoutineCodeImpl.DECLARED;
@@ -166,8 +167,8 @@ public class DeclaredRoutineParser extends DeclarationsParser
     /**
      * Parse a routine's name.
      * @param token the current token.
-     * @param dummyName
-     * @return
+     * @param dummyName a dummyName in case of parsing problem.
+     * @return the symbol table entry of the declared routines name.
      * @throws Exception if an error occurred.
      */
     private SymTabEntry parseRoutineName(Token token, String dummyName)
@@ -175,17 +176,82 @@ public class DeclaredRoutineParser extends DeclarationsParser
     {
         SymTabEntry routineId = null;
 
+        // parse the routine name identifier
+        if (token.getType() == IDENTIFIER) {
+            String routineName = token.getText().toLowerCase();
+            routineId = symTabStack.lookupLocal(routineName);
+
+            // Not already defined locally: Enter into local symbol table.
+            if (routineId == null) {
+                routineId = symTabStack.enterLocal(routineName);
+            }
+            // If already defined, it should be a forward definition.
+            else if (routineId.getAttribute(ROUTINE_CODE) != FORWARD) {
+                routineId = null;
+                errorHandler.flag(token, IDENTIFIER_REDEFINED, this);
+            }
+
+            token = nextToken();    // consume routine name identifier.
+        }
+        else {
+            errorHandler.flag(token, MISSING_IDENTIFIER, this);
+        }
+
+        // If necessary, create a dummy routine name symbol table entry.
+        if (routineId == null) {
+            routineId = symTabStack.enterLocal(dummyName);
+        }
+
         return routineId;
     }
 
     /**
      * Parse a routine's formal parameter list and the function return type.
-     * @param token
-     * @param routineId
+     * @param token the current token.
+     * @param routineId the symbol table entry of the declared routine's name.
      * @throws Exception if an error occurred.
      */
     private void parseHeader(Token token, SymTabEntry routineId)
         throws Exception
+    {
+        // Parse the routine's formal parameters.
+        parseFormalParameters(token, routineId);
+        token = currentToken();
+
+        // If this is a function, parse and set its return type.
+        if (routineId.getDefinition() == DefinitionImpl.FUNCTION) {
+            VariableDeclarationsParser variableDeclarationsParser =
+                new VariableDeclarationsParser(this);
+            variableDeclarationsParser.setDefinition(DefinitionImpl.FUNCTION);
+            TypeSpec type = variableDeclarationsParser.parseTypeSec(token);
+
+            token = currentToken();
+
+            // The return type cannot be an array or record.
+            if (type != null) {
+                TypeForm form = type.getForm();
+                if ((form == TypeFormImpl.ARRAY) ||
+                    (form == TypeFormImpl.RECORD))
+                {
+                    errorHandler.flag(token, INVALID_TYPE, this;;
+                }
+            }
+            // Missing Return Type
+            else {
+                type = Predefined.undefinedType;
+            }
+
+            routineId.setTypeSpec(type);
+            token = currentToken();
+        }
+    }
+
+    /**
+     *
+     * @param token
+     * @param routineId
+     */
+    private void parseFormalParameters(Token token, SymTabEntry routineId)
     {
     }
 
