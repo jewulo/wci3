@@ -1,7 +1,10 @@
 package wci.frontend.pascal.parsers;
 
 import wci.frontend.Token;
+import wci.frontend.TokenType;
 import wci.frontend.pascal.PascalParserTD;
+import wci.frontend.pascal.PascalTokenType;
+import wci.intermediate.Definition;
 import wci.intermediate.SymTabEntry;
 
 /**
@@ -33,6 +36,32 @@ public class DeclaredRoutineParser extends DeclarationsParser
     public SymTabEntry parse(Token token, SymTabEntry parentId)
         throws Exception
     {
+        Definition routineDefn = null;
+        String dummyName = null;
+        SymTabEntry routineId = null;
+        TokenType routineType = token.getType();
+
+        // Initialize.
+        switch ((PascalTokenType) routineType) {
+
+            case PROGRAM: {
+                break;
+            }
+
+            case PROCEDURE: {
+                break;
+            }
+
+            case FUNCTION: {
+                break;
+            }
+
+            default: {
+                break;
+            }
+
+
+        }
         return parentId;
     }
 }
