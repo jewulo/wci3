@@ -14,6 +14,8 @@ import java.util.EnumSet;
 
 import static wci.frontend.pascal.PascalErrorCode.*;
 import static wci.frontend.pascal.PascalTokenType.*;
+import static wci.intermediate.symtabimpl.DefinitionImpl.FIELD;
+import static wci.intermediate.symtabimpl.DefinitionImpl.VARIABLE;
 
 /**
  * <h1>VariableDeclarationsParser.</h1>
@@ -64,7 +66,7 @@ public class VariableDeclarationsParser extends DeclarationsParser
      * @param token the initial token.
      * @throws Exception if an error occurred.
      */
-    @Override
+    //@Override
     public void parse(Token token)
             throws Exception
     {
@@ -202,7 +204,7 @@ public class VariableDeclarationsParser extends DeclarationsParser
      * @return the type specification.
      * @throws Exception if an error occurred.
      */
-    private TypeSpec parseTypeSpec(Token token)
+    protected TypeSpec parseTypeSpec(Token token)
         throws Exception
     {
         // Synchronize on the : token.
@@ -219,6 +221,14 @@ public class VariableDeclarationsParser extends DeclarationsParser
             new TypeSpecificationParser(this);
         TypeSpec type = typeSpecificationParser.parse(token);
 
+        // Formal parameters and functions must have named types.
+        if ((definition != VARIABLE) && (definition != FIELD) &&
+            (type != null) && (type.getIdentifier() == null))
+        {
+            errorHandler.flag(token, INVALID_TYPE, this);
+        }
+
         return type;
     }
+
 }
