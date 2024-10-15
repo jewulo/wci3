@@ -47,14 +47,13 @@ public class BlockParser extends PascalParserTD
         StatementParser statementParser = new StatementParser(this);
 
         // Parse any declarations
-        declarationsParser.parse(token);
+        declarationsParser.parse(token, routineId);
 
         token = synchronize(StatementParser.STMT_START_SET);
-
         TokenType tokenType = token.getType();
         ICodeNode rootNode = null;
 
-        // Look for the BEGIN token to parse a compond statement.
+        // Look for the BEGIN token to parse a compound statement.
         if (tokenType == BEGIN) {
             rootNode = statementParser.parse(token);
         }

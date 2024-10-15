@@ -16,7 +16,7 @@ import java.util.EnumSet;
 
 import static wci.frontend.pascal.PascalErrorCode.*;
 import static wci.frontend.pascal.PascalTokenType.*;
-import static wci.intermediate.symtabimpl.DefinitionImpl.PROGRAM_PARM;
+import static wci.intermediate.symtabimpl.DefinitionImpl.*;
 import static wci.intermediate.symtabimpl.RoutineCodeImpl.DECLARED;
 import static wci.intermediate.symtabimpl.RoutineCodeImpl.FORWARD;
 import static wci.intermediate.symtabimpl.SymTabKeyImpl.*;
@@ -338,6 +338,50 @@ public class DeclaredRoutineParser extends DeclarationsParser
         boolean isProgram = routineId.getDefinition() == DefinitionImpl.PROGRAM;
         Definition parmDefn = isProgram ? PROGRAM_PARM : null;
         TokenType tokenType = token.getType();
-    }
 
+        // VAR or value parameter?
+        if (tokenType == VAR) {
+            if (!isProgram) {
+                parmDefn = VAR_PARM;
+            }
+            else {
+                errorHandler.flag(token, INVALID_VAR_PARM, this);
+            }
+
+            token = nextToken();    // consume VAR
+        }
+        else if (!isProgram) {
+            parmDefn = VALUE_PARM;
+        }
+
+        // Parse the parameter sublist and its type specification.
+        VariableDeclarationsParser variableDeclarationsParser =
+            new VariableDeclarationsParser(this);
+        variableDeclarationsParser.setDefinition(parmDefn);
+
+        ArrayList<SymTabEntry> sublist =
+            variableDeclarationsParser.parseIdentifierSublist(token,
+                                                    PARAMETER_FOLLOW_SET,
+                                                    COMMA_SET);
+        token = currentToken();
+        tokenType = token.getType();
+
+        if (!isProgram) {
+
+            // Look for one or more semicolons after a sublist
+            if (tokenType == SEMICOLON) {
+                while (token.getType() == SEMICOLON) {
+                    token = nextToken();    // consume the ;
+                }
+            }
+            // if at the start of the next sublist, then missing a semicolon.
+            else if (VariableDeclarationsParser.NEXT_START_SET.contains(tokenType)) {
+                errorHandler.flag(token, MISSING_SEMICOLON, this);
+            }
+
+            token = synchronize(PARAMETER_SET);
+        }
+
+        return sublist;
+    }
 }

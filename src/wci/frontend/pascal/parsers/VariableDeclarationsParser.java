@@ -14,8 +14,7 @@ import java.util.EnumSet;
 
 import static wci.frontend.pascal.PascalErrorCode.*;
 import static wci.frontend.pascal.PascalTokenType.*;
-import static wci.intermediate.symtabimpl.DefinitionImpl.FIELD;
-import static wci.intermediate.symtabimpl.DefinitionImpl.VARIABLE;
+import static wci.intermediate.symtabimpl.DefinitionImpl.*;
 
 /**
  * <h1>VariableDeclarationsParser.</h1>
@@ -39,7 +38,7 @@ public class VariableDeclarationsParser extends DeclarationsParser
      * Setter.
      * @param definition the definition to set.
      */
-    public void setDefinition(DefinitionImpl definition)
+    public void setDefinition(Definition definition)
     {
         this.definition = definition;
     }
@@ -77,7 +76,7 @@ public class VariableDeclarationsParser extends DeclarationsParser
         while (token.getType() == IDENTIFIER) {
 
             // Parse identifier sublist and its type specification.
-            parseIdentifierSublist(token);
+            parseIdentifierSublist(token, IDENTIFIER_FOLLOW_SET, COMMA_SET);
 
             token = currentToken();
             TokenType tokenType = token.getType();
@@ -114,13 +113,14 @@ public class VariableDeclarationsParser extends DeclarationsParser
         EnumSet.of(COMMA, COLON, IDENTIFIER, SEMICOLON);
 
     /**
-     * Parse a sublist of identifiers and their type specifications
-     *
+     * Parse a sublist of identifiers and their type specifications.
      * @param token the current token.
      * @return the sublist of identifiers in a declaration.
      * @throws Exception if an error occurred.
      */
-    private ArrayList<SymTabEntry> parseIdentifierSublist(Token token)
+    protected ArrayList<SymTabEntry> parseIdentifierSublist(Token token,
+                                                            EnumSet<PascalTokenType> followSet,
+                                                            EnumSet<PascalTokenType> commaSet)
         throws Exception
     {
         ArrayList<SymTabEntry> sublist = new ArrayList<SymTabEntry>();
@@ -133,28 +133,31 @@ public class VariableDeclarationsParser extends DeclarationsParser
                 sublist.add(id);
             }
 
-            token = synchronize(COMMA_SET);
+            token = synchronize(commaSet);
             TokenType tokenType = token.getType();
 
             // Look for the comma.
             if (tokenType == COMMA) {
                 token = nextToken();    // consume the comma
 
-                if (IDENTIFIER_FOLLOW_SET.contains(token.getType())) {
+                if (followSet.contains(token.getType())) {
                     errorHandler.flag(token, MISSING_IDENTIFIER, this);
                 }
             }
             else if (IDENTIFIER_START_SET.contains(tokenType)) {
                 errorHandler.flag(token, MISSING_COMMA, this);
             }
-        } while (!IDENTIFIER_FOLLOW_SET.contains(token.getType()));
+        } while (!followSet.contains(token.getType()));
 
-        // Parse the type specification.
-        TypeSpec type = parseTypeSpec(token);
+        if (definition != PROGRAM_PARM) {
 
-        // Assign the type specification to each identifier in the list.
-        for (SymTabEntry variableId : sublist) {
-            variableId.setTypeSpec(type);
+            // Parse the type specification
+            TypeSpec type = parseTypeSpec(token);
+
+            // Assign the type specification to each identifier
+            for (SymTabEntry variableId : sublist) {
+                variableId.setTypeSpec(type);
+            }
         }
 
         return sublist;
