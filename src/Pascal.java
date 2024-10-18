@@ -59,6 +59,7 @@ public class Pascal
                     crossReferencer.print(symTabStack);
                 }
 
+                intermediate = true;
                 if (intermediate) {
                     ParseTreePrinter treePrinter =
                             new ParseTreePrinter(System.out);
