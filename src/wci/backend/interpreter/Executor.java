@@ -1,6 +1,7 @@
 package wci.backend.interpreter;
 
 import wci.backend.Backend;
+import wci.backend.interpreter.executors.CallDeclaredExecutor;
 import wci.backend.interpreter.executors.StatementExecutor;
 import wci.frontend.Scanner;
 import wci.frontend.Source;

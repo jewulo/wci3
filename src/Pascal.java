@@ -8,8 +8,8 @@ import wci.message.*;
 import wci.util.CrossReferencer;
 import wci.util.ParseTreePrinter;
 
-import static wci.frontend.pascal.PascalTokenType.*;
-import static wci.intermediate.symtabimpl.SymTabKeyImpl.ROUTINE_ICODE;
+import static wci.intermediate.symtabimpl.SymTabKeyImpl.*;
+import static wci.message.MessageType.*;
 
 /**
  * <h1>Pascal</h1>
@@ -24,6 +24,14 @@ public class Pascal
     private Backend backend;            // backend
     private SymTabStack symTabStack;    // symbol table stack
 
+    private boolean intermediate;       // true to print intermediate code
+    private boolean xref;               // true to print cross-reference listing
+    private boolean lines;              // true to print source line tracing
+    private boolean assign;             // true to print value assignment tracing
+    private boolean fetch;              // true to print value fetch tracing
+    private boolean call;               // true to print routine call tracing
+    private boolean returnn;            // true to print routine return tracing
+
     /**
      * Compile or interpret a Pascal program.
      * @param operation either "compile" or "execute".
@@ -33,8 +41,13 @@ public class Pascal
     public Pascal(String operation, String filePath, String flags)
     {
         try {
-            boolean intermediate = flags.indexOf('i') > -1;
-            boolean xref         = flags.indexOf('x') > -1;
+            intermediate = flags.indexOf('i') > -1;
+            xref         = flags.indexOf('x') > -1;
+            lines        = flags.indexOf('l') > -1;
+            assign       = flags.indexOf('a') > -1;
+            fetch        = flags.indexOf('f') > -1;
+            call         = flags.indexOf('c') > -1;;               // true to print routine call tracing
+            returnn      = flags.indexOf('r') > -1;
 
             source = new Source(new BufferedReader(new FileReader(filePath)));
             source.addMessageListener(new SourceMessageListener());
@@ -54,12 +67,13 @@ public class Pascal
                 SymTabEntry programId = symTabStack.getProgramId();
                 iCode = (ICode) programId.getAttribute(ROUTINE_ICODE);
 
+                //xref = true;            // HACKY CODE FLAGS NOT WORKING
                 if (xref) {
                     CrossReferencer crossReferencer = new CrossReferencer();
                     crossReferencer.print(symTabStack);
                 }
 
-                intermediate = true;
+                //intermediate = true;    // HACKY CODE FLAGS NOT WORKING
                 if (intermediate) {
                     ParseTreePrinter treePrinter =
                             new ParseTreePrinter(System.out);
@@ -75,7 +89,7 @@ public class Pascal
         }
     }
 
-    private static final String FLAGS = "[-ix]";
+    private static final String FLAGS = "[-ixlafcr]";
     private static final String USAGE = "Usage: Pascal execute|compile " + FLAGS + " <source file path>";
 
     /**
@@ -87,10 +101,6 @@ public class Pascal
     {
         try {
             String operation = args[0];
-            //String operation = "compile";
-            //String operation = "execute";
-            //String operation = "wrong operation";
-
 
             // Operation.
             if (!(   operation.equalsIgnoreCase("compile")
@@ -99,7 +109,8 @@ public class Pascal
             }
 
             int i = 0;
-            String flags = "-x";
+            String flags = "-x";  // NO OPERATION FLAGS SPECIFIED
+            //flags = "-x";  // set flag to execute
 
             // Flags.
             while ((++i < args.length) && (args[i].charAt(0) == '-')) {
@@ -177,43 +188,21 @@ public class Pascal
 
             switch (type) {
 
+
                 case PARSER_SUMMARY: {
-                    Number[] body = (Number[]) message.getBody();
+                    Number body[] = (Number[]) message.getBody();
                     int statementCount = (Integer) body[0];
-                    int syntaxErrors =  (Integer) body[1];
+                    int syntaxErrors = (Integer) body[1];
                     float elapsedTime = (Float) body[2];
 
                     System.out.printf(PARSER_SUMMARY_FORMAT,
-                                        statementCount, syntaxErrors,
-                                        elapsedTime);
-                    break;
-                }
-
-                case TOKEN: {
-                    Object[] body = (Object[]) message.getBody();
-                    int line = (Integer) body[0];
-                    int position = (Integer) body[1];
-                    TokenType tokenType = (TokenType) body[2];
-                    String tokenText = (String) body[3];
-                    Object tokenValue = body[4];
-
-                    System.out.println(String.format(TOKEN_FORMAT,
-                                                     tokenType,
-                                                     line,
-                                                     position,
-                                                     tokenText));
-                    if (tokenValue != null) {
-                        if (tokenType == STRING) {
-                            tokenValue = "\"" + tokenType + "\"";
-                        }
-                        System.out.println(String.format(VALUE_FORMAT, tokenValue));
-                    }
-
+                            statementCount, syntaxErrors,
+                            elapsedTime);
                     break;
                 }
 
                 case SYNTAX_ERROR: {
-                    Object[] body = (Object[]) message.getBody();
+                    Object body[] = (Object []) message.getBody();
                     int lineNumber = (Integer) body[0];
                     int position = (Integer) body[1];
                     String tokenText = (String) body[2];
@@ -230,7 +219,7 @@ public class Pascal
                     // A pointer to the error followed by the error message.
                     flagBuffer.append("^\n*** ").append(errorMessage);
 
-                    // Text, if any bad token.
+                    // Text, if any, of the bad token.
                     if (tokenText != null) {
                         flagBuffer.append(" [at \"").append(tokenText)
                                 .append("\"]");
@@ -244,16 +233,28 @@ public class Pascal
     }
 
     private static final String INTERPRETER_SUMMARY_FORMAT =
-        "\n%,20d statement executed." +
-        "\n%,20d runtime errors." +
-        "\n%,20f seconds total execution time.\n";
+            "\n%,20d statements executed." +
+                    "\n%,20d runtime errors." +
+                    "\n%,20.2f seconds total execution time.\n";
 
     private static final String COMPILER_SUMMARY_FORMAT =
-        "\n%,20d instructions generated." +
-        "\n%,20.2f seconds total code generation time.\n";
+            "\n%,20d instructions generated." +
+                    "\n%,20.2f seconds total code generation time.\n";
+
+    private static final String LINE_FORMAT =
+            ">>> AT LINE %03d\n";
 
     private static final String ASSIGN_FORMAT =
-            " >>> LINE %03d: %s = %s\n";
+            ">>> AT LINE %03d: %s = %s\n";
+
+    private static final String FETCH_FORMAT =
+            ">>> AT LINE %03d: %s : %s\n";
+
+    private static final String CALL_FORMAT =
+            ">>> AT LINE %03d: CALL %s\n";
+
+    private static final String RETURN_FORMAT =
+            ">>> AT LINE %03d: RETURN FROM %s\n";
 
     /**
      * Listener for back end messages.
@@ -270,54 +271,94 @@ public class Pascal
             MessageType type = message.getType();
 
             switch (type) {
-                case ASSIGN: {
 
-                    if (firstOutputMessage) {
-                        System.out.println("\n===== OUTPUT =====\n");
-                        firstOutputMessage = false;
+                case SOURCE_LINE: {
+                    if (lines) {
+                        int lineNumber = (Integer) message.getBody();
+
+                        System.out.printf(LINE_FORMAT, lineNumber);
                     }
+                    break;
+                }
 
-                    Object[] body = (Object[]) message.getBody();
-                    int lineNumber = (Integer) body[0];
-                    String variableName = (String) body[1];
-                    Object value = body[2];
+                case ASSIGN: {
+                    if (assign) {
+                        Object body[] = (Object[]) message.getBody();
+                        int lineNumber = (Integer) body[0];
+                        String variableName = (String) body[1];
+                        Object value = body[2];
 
-                    System.out.printf(ASSIGN_FORMAT,
-                                        lineNumber, variableName, value);
+                        System.out.printf(ASSIGN_FORMAT,
+                                lineNumber, variableName, value);
+                    }
+                    break;
+                }
+
+                case FETCH: {
+                    if (fetch) {
+                        Object body[] = (Object[]) message.getBody();
+                        int lineNumber = (Integer) body[0];
+                        String variableName = (String) body[1];
+                        Object value = body[2];
+
+                        System.out.printf(FETCH_FORMAT,
+                                lineNumber, variableName, value);
+                    }
+                    break;
+                }
+
+                case CALL: {
+                    if (call) {
+                        Object body[] = (Object[]) message.getBody();
+                        int lineNumber = (Integer) body[0];
+                        String routineName = (String) body[1];
+
+                        System.out.printf(CALL_FORMAT,
+                                lineNumber, routineName);
+                    }
+                    break;
+                }
+
+                case RETURN: {
+                    if (returnn) {
+                        Object body[] = (Object[]) message.getBody();
+                        int lineNumber = (Integer) body[0];
+                        String routineName = (String) body[1];
+
+                        System.out.printf(RETURN_FORMAT,
+                                lineNumber, routineName);
+                    }
                     break;
                 }
 
                 case RUNTIME_ERROR: {
-
-                    Object[] body = (Object []) message.getBody() ;
+                    Object body[] = (Object []) message.getBody();
                     String errorMessage = (String) body[0];
                     Integer lineNumber = (Integer) body[1];
 
-                    System.out.print("*** RUNTIME ERROR ***");
+                    System.out.print("*** RUNTIME ERROR");
                     if (lineNumber != null) {
                         System.out.print(" AT LINE " +
-                                        String.format("%03d", lineNumber));
+                                String.format("%03d", lineNumber));
                     }
                     System.out.println(": " + errorMessage);
                     break;
                 }
 
                 case INTERPRETER_SUMMARY: {
-
-                    Number[] body = (Number[]) message.getBody();
+                    Number body[] = (Number[]) message.getBody();
                     int executionCount = (Integer) body[0];
-                    int runtimeErrors =  (Integer) body[1];
+                    int runtimeErrors = (Integer) body[1];
                     float elapsedTime = (Float) body[2];
 
                     System.out.printf(INTERPRETER_SUMMARY_FORMAT,
-                                    executionCount, runtimeErrors,
-                                    elapsedTime);
+                            executionCount, runtimeErrors,
+                            elapsedTime);
                     break;
                 }
 
                 case COMPILER_SUMMARY: {
-
-                    Number[] body = (Number[]) message.getBody();
+                    Number body[] = (Number[]) message.getBody();
                     int instructionCount = (Integer) body[0];
                     float elapsedTime = (Float) body[1];
 

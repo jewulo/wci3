@@ -1,14 +1,21 @@
 package wci.backend.interpreter.executors;
 
+import wci.frontend.pascal.parsers.CallDeclaredParser;
+import wci.frontend.pascal.parsers.CallStandardParser;
 import wci.intermediate.*;
 import wci.backend.interpreter.*;
+
+import static wci.intermediate.icodeimpl.ICodeKeyImpl.ID;
+import static wci.intermediate.symtabimpl.RoutineCodeImpl.DECLARED;
+import static wci.intermediate.symtabimpl.SymTabKeyImpl.ROUTINE_CODE;
 
 /**
  * <h1>CallExecutor</h1>
  *
  * <p>Execute a call to a procedure or function.</p>
  */
-public class CallExecutor extends StatementExecutor {
+public class CallExecutor extends StatementExecutor
+{
     /**
      * Constructor
      * @param parent the parent executor.
@@ -25,6 +32,13 @@ public class CallExecutor extends StatementExecutor {
      */
     public Object execute(ICodeNode node)
     {
-        return null;
+        SymTabEntry routineId = (SymTabEntry) node.getAttribute(ID);
+        RoutineCode routineCode = (RoutineCode) routineId.getAttribute(ROUTINE_CODE);
+        CallExecutor callExecutor = routineCode == DECLARED
+                                                   ? new CallDeclaredExecutor(this)
+                                                   : new CallStandardExecutor(this);
+
+        ++executionCount;   // count the call statement
+        return callExecutor.execute(node);
     }
 }

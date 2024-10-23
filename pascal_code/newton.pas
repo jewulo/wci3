@@ -1,36 +1,42 @@
-PROGRAM newton (input, output);
+program newton;
 
-CONST
-    EPSILON = 1e-6;
+const
+    epsilon = 1e-6;
 
-VAR
-    number          : integer;
-    root, sqRoot    : real;
+var    
+    number  : integer;
 
-BEGIN
-    REPEAT
+function root(x: real) : real;
+    var
+        r: real;
+    begin
+        r := 1;
+        repeat
+            r := (x/r + r) / 2;
+        until abs(x/sqr(r) - 1) < epsilon;
+        root := r;
+    end;
+
+
+procedure print(n: integer; root : real);
+    begin
+        writeln('The square root of ', number:4, ' is ', root:10:6);
+    end;
+
+begin
+    repeat
         writeln;
-        write('Enter new number (0 to quit): ') ;
+        write('Enter new number (0 to quit): ');
         read(number);
 
-        IF number = 0 THEN BEGIN
-            writeln(number:12, 0.0:12:6);
-        END
-        ELSE IF number < 0 THEN BEGIN
+        if number = 0 then begin
+            print(number, 0.0);
+        end
+        else if number < 0 then begin
             writeln('*** ERROR: number < 0');
+        end
+        else begin
+            print(number, root(number));
         END
-        ELSE BEGIN
-            sqRoot := sqrt(number);
-            writeln(number:12, sqRoot:12:6);
-            writeln;
-
-            root := 1;
-            REPEAT
-                root := (number/root + root)/2;
-                writeln(root:24:6,
-                        100*abs(root * sqRoot)/sqRoot:12:2,
-                        '%')
-            UNTIL abs(number/sqr(root) - 1) < EPSILON;
-        END
-    UNTIL number = 0
+    until number = 0
 END.

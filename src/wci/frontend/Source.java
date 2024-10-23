@@ -46,36 +46,6 @@ public class Source implements MessageProducer
     }
 
     /**
-     * Add a parser message listener.
-     * @param listener the message listener to add.
-     */
-    @Override
-    public void addMessageListener(MessageListener listener)
-    {
-        messageHandler.addListener(listener);
-    }
-
-    /**
-     * Remove a parser messagelistener.
-     * @param listener the message listener to remove.
-     */
-    @Override
-    public void removeMessageListener(MessageListener listener)
-    {
-        messageHandler.removeListener(listener);
-    }
-
-    /**
-     * Notify listeners after setting the message.
-     * @param message to set.
-     */
-    @Override
-    public void sendMessage(Message message)
-    {
-        messageHandler.sendMessage(message);
-    }
-
-    /**
      * Getter.
      * @return the current source line number.
      */
@@ -157,6 +127,44 @@ public class Source implements MessageProducer
     }
 
     /**
+     * @return true if at the end of the line, else return false.
+     * @throws Exception if an error occurred.
+     */
+    public boolean atEol()
+        throws Exception
+    {
+        return (line != null) && (currentPos == line.length());
+    }
+
+    /**
+     * @return true if at the end of the file, else return false.
+     * @throws Exception if an error occurred.
+     */
+    public boolean atEof()
+        throws Exception
+    {
+        // First time?
+        if (currentPos == -2) {
+            readLine();
+        }
+
+        return line == null;
+    }
+
+    /**
+     * Skip the rest of the current input line
+     * by forcing the next read to read a new line.
+     * @throws Exception if an error occurred.
+     */
+    public void skipToNextLine()
+        throws Exception
+    {
+        if (line != null) {
+            currentPos = line.length() + 1;
+        }
+    }
+
+    /**
      * Read the next source line.
      * @throws IOException if an I/O error occurred
      */
@@ -194,5 +202,35 @@ public class Source implements MessageProducer
                 throw ex;
             }
         }
+    }
+
+    /**
+     * Add a parser message listener.
+     * @param listener the message listener to add.
+     */
+    @Override
+    public void addMessageListener(MessageListener listener)
+    {
+        messageHandler.addListener(listener);
+    }
+
+    /**
+     * Remove a parser messagelistener.
+     * @param listener the message listener to remove.
+     */
+    @Override
+    public void removeMessageListener(MessageListener listener)
+    {
+        messageHandler.removeListener(listener);
+    }
+
+    /**
+     * Notify listeners after setting the message.
+     * @param message to set.
+     */
+    @Override
+    public void sendMessage(Message message)
+    {
+        messageHandler.sendMessage(message);
     }
 }
