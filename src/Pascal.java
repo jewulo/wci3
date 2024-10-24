@@ -187,8 +187,6 @@ public class Pascal
             MessageType type = message.getType();
 
             switch (type) {
-
-
                 case PARSER_SUMMARY: {
                     Number body[] = (Number[]) message.getBody();
                     int statementCount = (Integer) body[0];
