@@ -1,6 +1,7 @@
 package wci.backend.interpreter;
 
 import wci.backend.Backend;
+import wci.backend.BackendFactory;
 import wci.backend.interpreter.executors.CallDeclaredExecutor;
 import wci.backend.interpreter.executors.StatementExecutor;
 import wci.frontend.Scanner;
@@ -13,6 +14,7 @@ import wci.message.MessageType;
 
 import java.io.*;
 
+import static wci.backend.DebuggerType.COMMAND_LINE;
 import static wci.intermediate.icodeimpl.ICodeKeyImpl.ID;
 import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.CALL;
 import static wci.message.MessageType.INTERPRETER_SUMMARY;
@@ -26,29 +28,34 @@ public class Executor extends Backend
     protected static Scanner standardIn;        // standard input
     protected static PrintWriter standardOut;   // standard output
 
+    protected Debugger debugger;    // interactive source-level debugger.
+
     static {
         executionCount = 0;
         runtimeStack = MemoryFactory.createRuntimeStack();
         errorHandler = new RuntimeErrorHandler();
-
-        try {
-            standardIn = new PascalScanner(
-                            new Source(
-                                new BufferedReader(
-                                    new InputStreamReader(System.in))));
-
-            standardOut = new PrintWriter(
-                            new PrintStream(System.out));
-        } catch (IOException ignored) {
-        }
+        standardOut = new PrintWriter(new PrintStream(System.out));
     }
 
     /**
      * Constructor.
      */
-    public Executor()
+    public Executor(String inputPath)
     {
-        super();
+        try {
+            standardIn = inputPath != null
+                            ? new PascalScanner(
+                                new Source(
+                                    new BufferedReader(
+                                        new FileReader(inputPath))))
+                            : new PascalScanner(
+                                new Source(
+                                    new BufferedReader(
+                                        new InputStreamReader(System.in))));
+        }
+        catch (IOException ignored) {}
+
+        debugger = BackendFactory.createDebugger(COMMAND_LINE, this, runtimeStack);
     }
 
     /**

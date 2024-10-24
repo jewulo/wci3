@@ -1,5 +1,8 @@
 package wci.backend;
 
+import wci.backend.interpreter.Debugger;
+import wci.backend.interpreter.Executor;
+import wci.backend.interpreter.RuntimeStack;
 import wci.intermediate.ICode;
 import wci.intermediate.SymTab;
 import wci.intermediate.SymTabStack;

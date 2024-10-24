@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 
 import wci.frontend.*;
@@ -35,10 +36,11 @@ public class Pascal
     /**
      * Compile or interpret a Pascal program.
      * @param operation either "compile" or "execute".
-     * @param filePath the source file path.
+     * @param sourcePath the source file path.
+     * @param inputPath the input file path.
      * @param flags the command line flags.
      */
-    public Pascal(String operation, String filePath, String flags)
+    public Pascal(String operation, String sourcePath, String inputPath, String flags)
     {
         try {
             intermediate = flags.indexOf('i') > -1;
@@ -49,13 +51,13 @@ public class Pascal
             call         = flags.indexOf('c') > -1;;               // true to print routine call tracing
             returnn      = flags.indexOf('r') > -1;
 
-            source = new Source(new BufferedReader(new FileReader(filePath)));
+            source = new Source(new BufferedReader(new FileReader(sourcePath)));
             source.addMessageListener(new SourceMessageListener());
 
             parser = FrontEndFactory.createParser("Pascal", "top-down", source);
             parser.addMessageListener(new ParserMessageListener());
 
-            backend = BackendFactory.createBackend(operation);
+            backend = BackendFactory.createBackend(operation, inputPath);
             backend.addMessageListener(new BackendMessageListener());
 
             parser.parse();
@@ -95,7 +97,8 @@ public class Pascal
     /**
      * The main method.
      * @param args command-line arguments: "compile" or "execute" followed by
-     *             optional flags followed by the source file path.
+     *             optional flags followed by the source file path followed by
+     *             an optional runtime input data file path.
      */
     public static void main(String[] args)
     {
@@ -109,22 +112,36 @@ public class Pascal
             }
 
             int i = 0;
-            String flags = "-x";  // NO OPERATION FLAGS SPECIFIED
-            //flags = "-x";  // set flag to execute
+            String flags = "";
 
             // Flags.
             while ((++i < args.length) && (args[i].charAt(0) == '-')) {
                 flags += args[i].substring(1);
             }
 
+            String sourcePath = null;
+            String inputPath = null;
+
             // Source path.
             if (i < args.length) {
-                String path = args[i];
-                new Pascal(operation, path, flags);
+                sourcePath = args[i];
             }
             else {
                 throw new Exception();
             }
+
+            // Runtime input data file path.
+            if (++i < args.length) {
+                inputPath = args[i];
+
+                File inputFile = new File(inputPath);
+                if (! inputFile.exists()) {
+                    System.out.println("Input file '" + inputPath + "' does not exist.");
+                    throw new Exception();
+                }
+            }
+
+            new Pascal(operation, sourcePath, inputPath, flags);
         } catch (Exception e) {
             System.out.println(USAGE);
         }
@@ -187,8 +204,6 @@ public class Pascal
             MessageType type = message.getType();
 
             switch (type) {
-
-
                 case PARSER_SUMMARY: {
                     Number body[] = (Number[]) message.getBody();
                     int statementCount = (Integer) body[0];
