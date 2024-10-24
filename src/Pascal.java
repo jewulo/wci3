@@ -283,7 +283,7 @@ public class Pascal
 
                 case ASSIGN: {
                     if (assign) {
-                        Object body[] = (Object[]) message.getBody();
+                        Object[] body = (Object[]) message.getBody();
                         int lineNumber = (Integer) body[0];
                         String variableName = (String) body[1];
                         Object value = body[2];
@@ -296,7 +296,7 @@ public class Pascal
 
                 case FETCH: {
                     if (fetch) {
-                        Object body[] = (Object[]) message.getBody();
+                        Object[] body = (Object[]) message.getBody();
                         int lineNumber = (Integer) body[0];
                         String variableName = (String) body[1];
                         Object value = body[2];
@@ -309,7 +309,7 @@ public class Pascal
 
                 case CALL: {
                     if (call) {
-                        Object body[] = (Object[]) message.getBody();
+                        Object[] body = (Object[]) message.getBody();
                         int lineNumber = (Integer) body[0];
                         String routineName = (String) body[1];
 
@@ -321,7 +321,7 @@ public class Pascal
 
                 case RETURN: {
                     if (returnn) {
-                        Object body[] = (Object[]) message.getBody();
+                        Object[] body = (Object[]) message.getBody();
                         int lineNumber = (Integer) body[0];
                         String routineName = (String) body[1];
 
@@ -332,7 +332,7 @@ public class Pascal
                 }
 
                 case RUNTIME_ERROR: {
-                    Object body[] = (Object []) message.getBody();
+                    Object[] body = (Object []) message.getBody();
                     String errorMessage = (String) body[0];
                     Integer lineNumber = (Integer) body[1];
 
@@ -346,7 +346,7 @@ public class Pascal
                 }
 
                 case INTERPRETER_SUMMARY: {
-                    Number body[] = (Number[]) message.getBody();
+                    Number[] body = (Number[]) message.getBody();
                     int executionCount = (Integer) body[0];
                     int runtimeErrors = (Integer) body[1];
                     float elapsedTime = (Float) body[2];
@@ -358,7 +358,7 @@ public class Pascal
                 }
 
                 case COMPILER_SUMMARY: {
-                    Number body[] = (Number[]) message.getBody();
+                    Number[] body = (Number[]) message.getBody();
                     int instructionCount = (Integer) body[0];
                     float elapsedTime = (Float) body[1];
 
