@@ -1,4 +1,4 @@
-package wci.backend;
+package wci.backend.interpreter;
 
 /**
  * <h1>DebuggerType<h1/>

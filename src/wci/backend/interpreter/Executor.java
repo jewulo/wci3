@@ -3,18 +3,15 @@ package wci.backend.interpreter;
 import wci.backend.Backend;
 import wci.backend.BackendFactory;
 import wci.backend.interpreter.executors.CallDeclaredExecutor;
-import wci.backend.interpreter.executors.StatementExecutor;
 import wci.frontend.Scanner;
 import wci.frontend.Source;
 import wci.frontend.pascal.PascalScanner;
 import wci.intermediate.*;
 import wci.message.Message;
-import wci.message.MessageListener;
-import wci.message.MessageType;
 
 import java.io.*;
 
-import static wci.backend.DebuggerType.COMMAND_LINE;
+import static wci.backend.interpreter.DebuggerType.COMMAND_LINE;
 import static wci.intermediate.icodeimpl.ICodeKeyImpl.ID;
 import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.CALL;
 import static wci.message.MessageType.INTERPRETER_SUMMARY;
@@ -48,6 +45,7 @@ public class Executor extends Backend
                                 new Source(
                                     new BufferedReader(
                                         new FileReader(inputPath))))
+
                             : new PascalScanner(
                                 new Source(
                                     new BufferedReader(

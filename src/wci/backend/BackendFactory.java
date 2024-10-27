@@ -1,8 +1,9 @@
 package wci.backend;
 
 import wci.backend.compiler.CodeGenerator;
-import wci.backend.debuggerimpl.CommandLineDebugger;
+import wci.backend.interpreter.debuggerimpl.CommandLineDebugger;
 import wci.backend.interpreter.Debugger;
+import wci.backend.interpreter.DebuggerType;
 import wci.backend.interpreter.Executor;
 import wci.backend.interpreter.RuntimeStack;
 import wci.intermediate.TypeSpec;

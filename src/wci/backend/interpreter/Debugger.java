@@ -21,6 +21,7 @@ public abstract class Debugger
     private RuntimeStack runtimeStack;      // runtime stack
     private HashSet<Integer> breakpoints;   // set of breakpoints
     private HashSet<String> watchpoints;    // set of watchpoints
+
     private Scanner commandInput;           // input source for commands
 
     /**
