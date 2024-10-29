@@ -43,7 +43,7 @@ public class CommandProcessor
             case SOURCE_LINE: {
                 int lineNumber = (Integer) message.getBody();
 
-                if (this.stepping) {
+                if (stepping) {
                     debugger.atStatement(lineNumber);
                     debugger.readCommands();
                 }
@@ -86,7 +86,7 @@ public class CommandProcessor
             case CALL: {
                 Object[] body = (Object[]) message.getBody();
                 int lineNumber = (Integer) body[0];
-                String routineName = ((String) body[1]).toLowerCase();
+                String routineName = (String) body[1];
 
                 debugger.callRoutine(lineNumber, routineName);
                 break;
@@ -95,7 +95,7 @@ public class CommandProcessor
             case RETURN: {
                 Object[] body = (Object[]) message.getBody();
                 int lineNumber = (Integer) body[0];
-                String routineName = ((String) body[1]).toLowerCase();
+                String routineName = (String) body[1];
 
                 debugger.returnRoutine(lineNumber, routineName);
                 break;
@@ -152,6 +152,66 @@ public class CommandProcessor
     {
         stepping = false;
 
+        if (command.equals("step")) {
+            stepping = true;
+            checkForSemiColon();
+            return false;
+        }
+
+        if (command.equals("break")) {
+            Integer lineNumber = debugger.getInteger("Line number expected.");
+            checkForSemiColon();
+            debugger.setBreakPoint((Integer) lineNumber);
+            return true;
+        }
+
+        if (command.equals("unbreak")) {
+            Integer lineNumber = debugger.getInteger("Line number expected.");
+            checkForSemiColon();
+            debugger.unsetBreakPoint((Integer) lineNumber);
+            return true;
+        }
+
+        if (command.equals("watch")) {
+            String name = debugger.getWord("Variable name expected.");
+            checkForSemiColon();
+            debugger.setWatchPoint(name);
+            return true;
+        }
+
+        if (command.equals("unwatch")) {
+            String name = debugger.getWord("Variable name expected.");
+            checkForSemiColon();
+            debugger.unsetWatchPoint(name);
+            return true;
+        }
+
+        if (command.equals("stack")) {
+            checkForSemiColon();
+            stack();
+            return true;
+        }
+
+        if (command.equals("show")) {
+            show();
+            return true;
+        }
+
+        if (command.equals("assign")) {
+            assign();
+            return true;
+        }
+
+        if (command.equals("go")) {
+            checkForSemiColon();
+            return false;
+        }
+
+        if (command.equals("quit")) {
+            checkForSemiColon();
+            debugger.quit();
+        }
+
         throw new Exception("Invalid command: '" + command + "'.");
     }
 
@@ -159,7 +219,30 @@ public class CommandProcessor
      * Create the call stack display.
      */
     private void stack()
-    {}
+    {
+        ArrayList callStack = new ArrayList();      // What is in the Book and on GitHub...no <type variable>
+
+        // Loop over the activation records on the runtime stack
+        // starting at the top of stack.
+        RuntimeStack runtimeStack = debugger.getRuntimeStack();
+        ArrayList<ActivationRecord> arList = runtimeStack.records();
+        for (int i = arList.size() - 1; i >= 0; --i) {
+            ActivationRecord ar = arList.get(i);
+            SymTabEntry routineId = ar.getRoutineId();
+
+            // Add the symbol table entry of the procedure or function.
+            callStack.add(routineId);   // ...this looks hacky
+
+            // Create and add a name-value pair for each local variable.
+            for (String name : ar.getAllNames()) {
+                Object value = ar.getCell(name).getValue();
+                callStack.add(new NameValuePair(name, value));  // ...this looks hacky
+            }
+        }
+
+        // Display the call stack.
+        debugger.displayCallStack(callStack);
+    }
 
     /**
      * Show the current value of a variable.
@@ -168,7 +251,11 @@ public class CommandProcessor
     private void show()
         throws Exception
     {
+        CellTypePair pair = createCellTypePair();
+        Cell cell = pair.getCell();
 
+        checkForSemiColon();
+        debugger.displayValue(NameValuePair.valueString(cell.getValue()));
     }
 
     /**
@@ -178,10 +265,60 @@ public class CommandProcessor
     private void assign()
         throws Exception
     {
+        CellTypePair pair = createCellTypePair();
+        Object newValue = debugger.getValue("Invalid value.");
+
+        checkForSemiColon();
+        pair.setValue(newValue);
     }
 
+    /**
+     * Create a cell-data type pair.
+     * @return the CellTypePair object.
+     * @throws Exception if an error occurred.
+     */
     private CellTypePair createCellTypePair()
         throws Exception
     {
+        RuntimeStack runtimeStack = debugger.getRuntimeStack();
+        int currentLevel = runtimeStack.currentNestingLevel();
+        ActivationRecord ar = null;
+        Cell cell = null;
+
+        // Parse the variable name.
+        String variableName = debugger.getWord("Variable name expected");
+
+        // Find the variable's cell in the call stack.
+        for (int level = currentLevel; (cell == null) && (level > 0); --level) {
+            ar = runtimeStack.getTopmost(level);
+            cell = ar.getCell(variableName);
+        }
+
+        if (cell == null) {
+            throw new Exception("Undeclared variable name '" + variableName + "'.");
+        }
+
+        // VAR parameter.
+        if (cell.getValue() instanceof Cell) {
+            cell = (Cell) cell.getValue();
+        }
+
+        // Find the variable's symbol table entry.
+        SymTab symTab = (SymTab) ar.getRoutineId().getAttribute(ROUTINE_SYMTAB);
+        SymTabEntry id = symTab.lookup(variableName);
+
+        return new CellTypePair(id.getTypeSpec(), cell, debugger);
+    }
+
+    /**
+     * Verify that a command ends with a semicolon.
+     * @throws Exception if an error occurred.
+     */
+    private void checkForSemiColon()
+        throws Exception
+    {
+        if (debugger.currentToken().getType() != SEMICOLON) {
+            throw new Exception("Invalid command syntax.");
+        }
     }
 }

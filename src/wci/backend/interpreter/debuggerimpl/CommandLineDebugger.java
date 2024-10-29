@@ -43,7 +43,7 @@ public class CommandLineDebugger extends Debugger
     @Override
     public void promptForCommand()
     {
-        System.out.print(">>> Command?");
+        System.out.print(">>> Command? ");
     }
 
     /**
@@ -146,6 +146,7 @@ public class CommandLineDebugger extends Debugger
                                    definition.getText().toUpperCase() + " " +
                                    routineName);
             }
+
             // Variable name-value pair.
             else if (item instanceof NameValuePair) {
                 NameValuePair pair = (NameValuePair) item;

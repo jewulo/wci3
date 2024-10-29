@@ -137,7 +137,7 @@ public abstract class Debugger
         Token token = currentToken();
         TokenType type = token.getType();
 
-        if (type == IDENTIFIER) {
+        if (type == INTEGER) {
             Integer value = (Integer) token.getValue();
             nextToken();
             return value;

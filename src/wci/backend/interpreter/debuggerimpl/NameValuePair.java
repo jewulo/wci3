@@ -73,8 +73,8 @@ public class NameValuePair
 
         // Record value.
         else if (value instanceof HashMap) {
-            recordValueString((HashMap<String, Cell>) value, buffer);
-            //recordValueString((HashMap) value, buffer);
+            //recordValueString((HashMap<String, Cell>) value, buffer);
+            recordValueString((HashMap) value, buffer);
         }
 
         // Character value.

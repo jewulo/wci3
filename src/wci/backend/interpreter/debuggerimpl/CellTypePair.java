@@ -42,6 +42,24 @@ public class CellTypePair
         parseVariable();
     }
 
+    /**
+     * Getter.
+     * @return the memory cell.
+     */
+    protected Cell getCell()
+    {
+        return cell;
+    }
+
+    /**
+     * Getter.
+     * @return the data type.
+     */
+    protected TypeSpec getType()
+    {
+        return type;
+    }
+
     // Synchronisation set for variable modifiers.
     protected static final EnumSet<PascalTokenType> MODIFIER_SET =
         EnumSet.of(LEFT_BRACKET, DOT);
@@ -85,7 +103,6 @@ public class CellTypePair
 
         int index = debugger.getInteger("Integer index expected.");
         int minValue = 0;
-
         TypeSpec indexType = (TypeSpec) type.getAttribute(ARRAY_INDEX_TYPE);
 
         rangeCheck(index, indexType, "Index out of range.");
@@ -169,11 +186,11 @@ public class CellTypePair
     {
         if (    (   (type.baseType() == Predefined.integerType)
                 &&  (value instanceof Integer))
-            ||  (   (type.baseType() == Predefined.realType)
+            ||  (   (type == Predefined.realType)
                 &&  (value instanceof Float))
-            ||  (   (type.baseType() == Predefined.booleanType)
+            ||  (   (type == Predefined.booleanType)
                 &&  (value instanceof Boolean))
-            ||  (   (type.baseType() == Predefined.charType)
+            ||  (   (type == Predefined.charType)
                 &&  (value instanceof Character)))
         {
             if (type.baseType() == Predefined.integerType) {
@@ -182,8 +199,7 @@ public class CellTypePair
 
             cell.setValue(value);
         }
-        else
-        {
+        else {
             throw new Exception("Type mismatch.");
         }
     }
