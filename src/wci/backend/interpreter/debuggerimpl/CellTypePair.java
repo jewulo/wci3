@@ -142,7 +142,7 @@ public class CellTypePair
         }
 
         SymTab symTab = (SymTab) type.getAttribute(RECORD_SYMTAB);
-        SymTabEntry id = symTab.lookup(fieldName);;
+        SymTabEntry id = symTab.lookup(fieldName);
         type = id.getTypeSpec();
     }
 
