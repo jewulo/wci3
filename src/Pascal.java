@@ -11,6 +11,8 @@ import wci.util.ParseTreePrinter;
 
 import static wci.intermediate.symtabimpl.SymTabKeyImpl.*;
 import static wci.message.MessageType.*;
+import static wci.ide.IDEControl.*;
+
 
 /**
  * <h1>Pascal</h1>
@@ -177,10 +179,19 @@ public class Pascal
         }
     }
 
+    /*
     private static final String PARSER_SUMMARY_FORMAT =
+            PARSER_TAG +
             "\n%,20d source lines." +
             "\n%,20d syntax errors." +
             "\n%,20f seconds total parsing time.\n";
+    */
+
+    private static final String PARSER_SUMMARY_FORMAT =
+            PARSER_TAG +
+            "\n%,d source lines, " +
+            "\n%,d syntax errors, " +
+            "\n%,.2f seconds total parsing time.\n";
 
     private static final String TOKEN_FORMAT =
             ">>> %-15s line=%03d, pos=%2d, text=\"%s\"";
@@ -205,7 +216,7 @@ public class Pascal
 
             switch (type) {
                 case PARSER_SUMMARY: {
-                    Number body[] = (Number[]) message.getBody();
+                    Number[] body = (Number[]) message.getBody();
                     int statementCount = (Integer) body[0];
                     int syntaxErrors = (Integer) body[1];
                     float elapsedTime = (Float) body[2];
@@ -217,22 +228,26 @@ public class Pascal
                 }
 
                 case SYNTAX_ERROR: {
-                    Object body[] = (Object []) message.getBody();
+                    Object[] body = (Object []) message.getBody();
                     int lineNumber = (Integer) body[0];
                     int position = (Integer) body[1];
                     String tokenText = (String) body[2];
                     String errorMessage = (String) body[3];
 
-                    int spaceCount = PREFIX_WIDTH + position;
+                    //int spaceCount = PREFIX_WIDTH + position;
                     StringBuilder flagBuffer = new StringBuilder();
 
                     // Spaces up to the error position.
+/*
                     for (int i = 1; i < spaceCount; ++i) {
                         flagBuffer.append(' ');
                     }
+*/
 
                     // A pointer to the error followed by the error message.
-                    flagBuffer.append("^\n*** ").append(errorMessage);
+                    // flagBuffer.append("^\n*** ").append(errorMessage);
+                    flagBuffer.append(String.format(SYNTAX_TAG + "%d: %s",
+                                                    lineNumber, errorMessage));
 
                     // Text, if any, of the bad token.
                     if (tokenText != null) {
@@ -247,9 +262,14 @@ public class Pascal
         }
     }
 
+//    private static final String INTERPRETER_SUMMARY_FORMAT =
+//            "\n%,20d statements executed." +
+//                    "\n%,20d runtime errors." +
+//                    "\n%,20.2f seconds total execution time.\n";
+
     private static final String INTERPRETER_SUMMARY_FORMAT =
-            "\n%,20d statements executed." +
-                    "\n%,20d runtime errors." +
+            INTERPRETER_TAG + "\n%,d statements executed, " +
+                              "\n%,d runtime errors, " +
                     "\n%,20.2f seconds total execution time.\n";
 
     private static final String COMPILER_SUMMARY_FORMAT =
@@ -277,6 +297,7 @@ public class Pascal
     private class BackendMessageListener implements MessageListener
     {
         private boolean firstOutputMessage = true;
+
         /**
          * Called by the back end whenever it produces a message.
          * @param message the message
