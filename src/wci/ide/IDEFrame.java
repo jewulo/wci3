@@ -1,6 +1,9 @@
 package wci.ide;
 
+import wci.ide.ideimpl.CallStackFrame;
+import wci.ide.ideimpl.ConsoleFrame;
 import wci.ide.ideimpl.DebugFrame;
+import wci.ide.ideimpl.EditFrame;
 
 import java.awt.*;
 import java.awt.event.*;

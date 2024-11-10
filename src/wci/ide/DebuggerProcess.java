@@ -2,11 +2,12 @@ package wci.ide;
 
 import com.sun.tools.jconsole.JConsoleContext;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
-import static wci.ide.IDEControl.INTERPRETER_TAG;
+import static wci.ide.IDEControl.*;
 
 /**
  * <h1>DebuggerProcess</h1>
@@ -148,7 +149,106 @@ public class DebuggerProcess extends Thread
      */
     private boolean processTag(String text)
     {
+        // Listing the line.
+        if (text.startsWith(LISTING_TAG)) {
+            control.addToDebugWindowListing(text.substring(LISTING_TAG.length()));
+            return true;
+        }
+        
+        // Syntax error message.
+        else if (text.startsWith(SYNTAX_TAG)) {
+            String errorMessage = text.substring(SYNTAX_TAG.length());
+            control.addToEditWindowErrors(errorMessage);
+            haveSyntaxErrors = true;
+            return true;
+        }
+        
+        // Parser message.
+        else if (text.startsWith(PARSER_TAG)) {
+            control.setEditWindowMessage(text.substring(PARSER_TAG.length()),
+                                         haveSyntaxErrors ? Color.RED
+                                                          : Color.BLUE);
+            
+            if (!haveSyntaxErrors) {
+                control.clearEditWindowErrors();
+                control.setDebugWindowMessage("", Color.BLUE);
+                control.showDebugWindow(sourceName);
+                control.showCallStackWindow(sourceName);
+                control.showConsoleWindow(sourceName);
+            }
+            else {
+                control.setDebugWindowMessage("Fix syntax errors.",
+                                              Color.RED);
+                control.stopDebugWindow();
+                control.disableConsoleWindowInput();
+            }
+            
+            return true;
+        }
+        
+        // Debugger at a source statement.
+        else if (text.startsWith(DEBUGGER_AT_TAG)) {
+            String lineNumber = text.substring(DEBUGGER_AT_TAG.length());
+            control.setDebugWindowAtListingLine(Integer.parseInt(lineNumber.trim()));
+            control.setDebugWindowMessage(" ", Color.BLUE);
+            return true;
+        }
 
+        // Debugger at a source statement.
+        else if (text.startsWith(DEBUGGER_BREAK_TAG)) {
+            String lineNumber = text.substring(DEBUGGER_BREAK_TAG.length());
+            control.breakDebugWindowAtListingLine(Integer.parseInt(lineNumber.trim()));
+            control.setDebugWindowMessage("Break at text " + lineNumber,
+                                           Color.BLUE);
+            return true;
+        }
+
+        // Debugger add a routine to call stack.
+        else if (text.startsWith(DEBUGGER_ROUTINE_TAG)) {
+            String[] components = text.split(":");
+            String level = components[1].trim();
+
+            // Header.
+            if (level.equals("-1")) {
+                control.initializeCallStackWindow();
+            }
+            
+            // Footer
+            else if (level.equals("-2")) {
+                control.completeCallStackWindow();
+            }
+            
+            // Routine name.
+            else {
+                String header = components[2].trim();
+                control.addRoutineToCallStackWindow(level, header);
+            }
+            
+            return true;
+        }
+        
+        // Debugger add a local variable to the call stack.
+        else if (text.startsWith(DEBUGGER_VARIABLE_TAG)) {
+            text = text.substring(DEBUGGER_VARIABLE_TAG.length());
+
+            int index = text.indexOf(":");
+            String name = text.substring(0, index);
+            String value = text.substring(index + 1);
+            control.addVariableToCallStackWindow(name , value);
+            return true;
+        }
+
+        // Interpreter message.
+        else if (text.startsWith(INTERPRETER_TAG)) {
+            control.setDebugWindowMessage(text.substring(INTERPRETER_TAG.length()),
+                                          Color.BLUE);
+            control.stopDebugWindow();
+            control.disableConsoleWindowInput();
+            return true;
+        }
+        else {
+            return false;   // It wasn't an output tag
+        }
     }
 
     /**

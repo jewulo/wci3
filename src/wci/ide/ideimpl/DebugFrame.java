@@ -30,6 +30,15 @@ public class DebugFrame
     }
 
     /**
+     * Initialize GUI components.
+     * @throws Exception if an error occurred.
+     */
+    private void initGuiComponents()
+        throws Exception
+    {
+    }
+
+    /**
      * Constructor.
      */
     public DebugFrame(IDEControl control)
