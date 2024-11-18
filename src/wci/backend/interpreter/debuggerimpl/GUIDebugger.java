@@ -22,7 +22,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Constructor.
-     *
      * @param backend      the back end.
      * @param runtimeStack the runtime stack.
      */
@@ -34,7 +33,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Process a message from the backend.
-     *
      * @param message the message.
      */
     @Override
@@ -51,7 +49,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Parse a debugger command.
-     *
      * @return true to parse another command immediately.
      */
     @Override
@@ -73,7 +70,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Process a breakpoint at a statement.
-     *
      * @param lineNumber the statement line number.
      */
     @Override
@@ -84,7 +80,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Process the current value of a watchpoint variable.
-     *
      * @param lineNumber the current statement line number.
      * @param name       the variable name.
      * @param value      the variable's value.
@@ -96,7 +91,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Process assigning a new value ot a watchpoint variable.
-     *
      * @param lineNumber the current statement line number.
      * @param name       the variable name.
      * @param value      the new value.
@@ -108,7 +102,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Process calling a declared procedure or function.
-     *
      * @param lineNumber  the current statement line number.
      * @param routineName the routineName
      */
@@ -119,7 +112,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Process returning from a declared procedure or function.
-     *
      * @param lineNumber  the current statement line number.
      * @param routineName the routineName
      */
@@ -130,17 +122,16 @@ public class GUIDebugger extends Debugger
 
     /**
      * Display a value.
-     *
      * @param valueString the value string.
      */
     @Override
     public void displayValue(String valueString)
     {
+        System.out.println(valueString);
     }
 
     /**
      * Display the call stack.
-     *
      * @param stack the list of elements of the call stack.
      */
     @Override
@@ -187,7 +178,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Handle a debugger command error.
-     *
      * @param errorMessage the error message.
      */
     @Override
@@ -198,7 +188,6 @@ public class GUIDebugger extends Debugger
 
     /**
      * Handle a source program runtime error.
-     *
      * @param errorMessage the error message.
      * @param lineNumber   the source line number where the error occurred.
      */

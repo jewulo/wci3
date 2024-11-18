@@ -16,11 +16,11 @@ import static wci.ide.IDEControl.*;
  */
 public class DebuggerProcess extends Thread
 {
-    private IDEControl  control;                // the IDE Control Interface
-    private Process     process;                // the debugger process
-    private String      sourceName;             // source file name
+    private IDEControl control;                 // the IDE Control Interface
+    private Process process;                    // the debugger process
+    private String sourceName;                  // source file name
     private PrintWriter toDebuggerStream;       // IDE to debugger I/O stream
-    private DebuggerOutput  debuggerOutput;     // debugger process output
+    private DebuggerOutput debuggerOutput;      // debugger process output
     private boolean haveSyntaxErrors = false;   // true if syntax errors
     private boolean debugging = false;          // true if debugging process I/O
 
@@ -113,7 +113,7 @@ public class DebuggerProcess extends Thread
 
                 // The debugger output text contains the ! character.
                 // It may be the start of an output tag.
-                if (index > 0) {
+                if (index >= 0) {
 
                     // Add any preceding text to the console window
                     if (index > 0) {
@@ -126,6 +126,7 @@ public class DebuggerProcess extends Thread
                     if (processTag(text)) {
                         index = -1;
                     }
+
                     // No, it wasn't.
                     // Loop again to process the rest of the output text.
                     else {
