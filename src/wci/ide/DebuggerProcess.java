@@ -2,11 +2,12 @@ package wci.ide;
 
 import com.sun.tools.jconsole.JConsoleContext;
 
+import java.io.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
+import wci.ide.IDEControl;
+
+import static wci.backend.interpreter.Debugger.*;
 import static wci.ide.IDEControl.*;
 
 /**
@@ -195,7 +196,7 @@ public class DebuggerProcess extends Thread
             return true;
         }
 
-        // Debugger at a source statement.
+        // Debugger break at a source statement.
         else if (text.startsWith(DEBUGGER_BREAK_TAG)) {
             String lineNumber = text.substring(DEBUGGER_BREAK_TAG.length());
             control.breakDebugWindowAtListingLine(Integer.parseInt(lineNumber.trim()));
@@ -235,6 +236,7 @@ public class DebuggerProcess extends Thread
             int index = text.indexOf(":");
             String name = text.substring(0, index);
             String value = text.substring(index + 1);
+
             control.addVariableToCallStackWindow(name , value);
             return true;
         }

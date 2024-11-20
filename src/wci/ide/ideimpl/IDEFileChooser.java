@@ -1,6 +1,8 @@
 package wci.ide.ideimpl;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
 import java.io.File;
 
 /**
@@ -58,7 +60,58 @@ public class IDEFileChooser
     }
 
 
-    public File choose(JTextField sourcePathText, EditFrame editFrame) {
-        return null;
+    /**
+     * Choose a file
+     * @param textField filename text field.
+     * @param parent the parent of the file selection dialog
+     * @return the file selected in the dialog
+     */
+    public File choose(JTextField textField, Component parent)
+    {
+        int option = this.showOpenDialog(parent);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File file = this.getSelectedFile();
+            textField.setText(file.getPath());
+
+            return file;
+        }
+        else {
+            return null;
+        }
+    }
+
+    /**
+     * Choose a file
+     * @param textField filename text field.
+     * @param parent the parent of the file selection dialog
+     * @param multiple true if multiple files can be selected, false otherwise
+     * @return the file selected in the dialog
+     */
+    public File choose(JTextField textField, Component parent, boolean multiple)
+    {
+        if (!multiple) {
+            return choose(textField, parent);
+        }
+
+        int option = this.showOpenDialog(parent);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File[] files = this.getSelectedFiles();
+            StringBuffer buffer = new StringBuffer();
+
+            for (int i = 0; i < files.length; ++i) {
+                if (i > 0) {
+                    buffer.append(";");
+                }
+                buffer.append(files[i].getPath());
+            }
+
+            textField.setText(buffer.toString());
+            return files[0];
+        }
+        else {
+            return null;
+        }
     }
 }

@@ -101,6 +101,25 @@ public class IDEFrame
     }
 
     /**
+     * Process a window event.
+     * @param event  the window event
+     */
+    @Override
+    protected void processWindowEvent(WindowEvent event)
+    {
+        super.processWindowEvent(event);
+
+        if (event.getID() == WindowEvent.WINDOW_CLOSING) {
+            if (debuggerProcess != null) {
+                debuggerProcess.kill();
+            }
+
+            debugFrame.stop();
+            System.exit(0);
+        }
+    }
+
+    /**
      * Set the path of the source file.
      * @param sourcePath the path.
      */

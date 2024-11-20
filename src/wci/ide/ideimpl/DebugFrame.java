@@ -527,8 +527,8 @@ public class DebugFrame
          */
         public ListingLine(String text, boolean breakable)
         {
-            this.text = text;
             this.breakable = breakable;
+            this.text = text;
         }
 
         /**
@@ -540,7 +540,12 @@ public class DebugFrame
             return this.text;
         }
 
-        public void setText(String text) {
+        /**
+         * Setter
+         * @param text the line text.
+         */
+        public void setText(String text)
+        {
             this.text = text;
         }
 

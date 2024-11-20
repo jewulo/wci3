@@ -259,7 +259,8 @@ public class CallStackFrame
          * @return the node label.
          */
         @Override
-        public String toString() {
+        public String toString()
+        {
             return level + " " + header;
         }
     }
@@ -287,7 +288,8 @@ public class CallStackFrame
          * @return the node label.
          */
         @Override
-        public String toString() {
+        public String toString()
+        {
             return name + ": " + value;
         }
     }
