@@ -109,6 +109,113 @@ public class CodeGenerator extends Backend
     // General Code Emitters
     // =====================
 
+    /**
+     * Emit a blank line
+     */
+    protected void emitBlankLine()
+    {
+        assemblyFile.println();
+        assemblyFile.flush();
+    }
+
+    /**
+     * Emit a label
+     * @param label the label
+     */
+    protected void emitLabel(Label label)
+    {
+        assemblyFile.println(label + ":");
+        assemblyFile.flush();
+    }
+
+    /**
+     * Emit a label preceded by an integer value for a switch table
+     * @param value in the switch table
+     * @param label the label
+     */
+    protected void emitLabel(int value, Label label)
+    {
+        assemblyFile.println("\t  " + value + ": " + label);
+        assemblyFile.flush();
+    }
+
+    /**
+     * Emit a label preceded by a string value for a switch table
+     * @param value in the switch table
+     * @param label the label
+     */
+    protected void emitLabel(String value, Label label)
+    {
+        assemblyFile.println("\t  " + value + ": " + label);
+        assemblyFile.flush();
+    }
+
+    /**
+     * Emit a directive
+     * @param directive the directive code.
+     */
+    protected void emitDirective(Directive directive)
+    {
+        assemblyFile.println(directive.toString());
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit a 1-operand directive
+     * @param directive the directive code.
+     * @param operand the directive operand.
+     */
+    protected void emitDirective(Directive directive, String operand)
+    {
+        assemblyFile.println(directive.toString() + " " + operand);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit a 1-operand directive
+     * @param directive the directive code.
+     * @param operand the directive operand.
+     */
+    protected void emitDirective(Directive directive, int operand)
+    {
+        assemblyFile.println(directive.toString() + " " + operand);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit a 2-operand directive
+     * @param directive the directive code.
+     * @param operand1 the first directive operand.
+     * @param operand2 the second directive operand.
+     */
+    protected void emitDirective(Directive directive, String operand1, String operand2)
+    {
+        assemblyFile.println(directive.toString() + " " + operand1
+                                                  + " " + operand2);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit a 3-operand directive
+     * @param directive the directive code.
+     * @param operand1 the first directive operand.
+     * @param operand2 the second directive operand.
+     * @param operand3 the third directive operand.
+     */
+    protected void emitDirective(Directive directive, String operand1, String operand2, String operand3)
+    {
+        assemblyFile.println(directive.toString() + " " + operand1
+                                                  + " " + operand2
+                                                  + " " + operand3);
+
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
     // =====
     // Loads
     // =====
@@ -129,7 +236,6 @@ public class CodeGenerator extends Backend
      */
     @Override
     public void addMessageListener(MessageListener listener) {
-
     }
 
     /**
@@ -137,7 +243,6 @@ public class CodeGenerator extends Backend
      */
     @Override
     public void removeMessageListener(MessageListener listener) {
-
     }
 
     /**
@@ -145,6 +250,5 @@ public class CodeGenerator extends Backend
      */
     @Override
     public void sendMessage(Message message) {
-
     }
 }
