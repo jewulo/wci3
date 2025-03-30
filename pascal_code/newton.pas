@@ -9,6 +9,7 @@ var
 function root(x: real) : real;
     var
         r: real;
+
     begin
         r := 1;
         repeat
@@ -16,7 +17,6 @@ function root(x: real) : real;
         until abs(x/sqr(r) - 1) < epsilon;
         root := r;
     end;
-
 
 procedure print(n: integer; root : real);
     begin
@@ -37,6 +37,6 @@ begin
         end
         else begin
             print(number, root(number));
-        END
+        end
     until number = 0
-END.
+end.
