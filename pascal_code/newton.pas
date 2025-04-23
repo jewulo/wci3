@@ -6,9 +6,9 @@ const
 var    
     number  : integer;
 
-function root(x: real) : real;
+function root(x : real) : real;
     var
-        r: real;
+        r : real;
 
     begin
         r := 1;
@@ -18,7 +18,7 @@ function root(x: real) : real;
         root := r;
     end;
 
-procedure print(n: integer; root : real);
+procedure print(n : integer; root : real);
     begin
         writeln('The square root of ', number:4, ' is ', root:10:6);
     end;

@@ -1,14 +1,21 @@
 package wci.backend.compiler;
 
+import java.io.*;
+
 import wci.backend.*;
-import wci.backend.compiler.generators.ProgramGenerator;
+import wci.backend.compiler.generators.*;
 import wci.intermediate.*;
+import wci.intermediate.symtabimpl.*;
+import wci.intermediate.typeimpl.TypeFormImpl;
 import wci.message.*;
 
-import java.io.File;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-
+import static wci.intermediate.symtabimpl.DefinitionImpl.*;
+import static wci.intermediate.symtabimpl.SymTabKeyImpl.*;
+import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
+import static wci.intermediate.icodeimpl.ICodeKeyImpl.*;
+import static wci.intermediate.typeimpl.TypeFormImpl.*;
+import static wci.intermediate.typeimpl.TypeKeyImpl.*;
+import static wci.backend.compiler.Instruction.*;
 import static wci.message.MessageType.COMPILER_SUMMARY;
 
 /**
@@ -231,24 +238,215 @@ public class CodeGenerator extends Backend
     // =========
     // Utilities
     // =========
+
     /**
-     * @param listener the listener to add.
+     * Return whether or the not a data type is structured.
+     * @param type the data type.
+     * @return true if the type is a string, array, or record; else false.
      */
-    @Override
-    public void addMessageListener(MessageListener listener) {
+    protected boolean isStructured(TypeSpec type)
+    {
+        TypeForm form = type.getForm();
+
+        return type.isPascalString() || (form == ARRAY) || (form == RECORD);
     }
 
     /**
-     * @param listener the listener to add.
+     * Return whether or not a variable is wrapped to pass by reference.
+     * @param variableId the symbol table entry of the variable.
+     * @return true if wrapped, false if not.
      */
-    @Override
-    public void removeMessageListener(MessageListener listener) {
+    protected boolean isWrapped(SymTabEntry variableId)
+    {
+        TypeSpec type = variableId.getTypeSpec();
+        TypeForm form = type.getForm();
+        Definition defn = variableId.getDefinition();
+
+        // Arrays and records are not wrapped.
+        return (defn == VAR_PARM) && (form != ARRAY) && (form != RECORD);
     }
 
     /**
-     * @param message the message to set.
+     * Return whether or not a value needs to be cloned to pass by value.
+     * @param formalId the symbol table entry of the variable.
+     * @return true if wrapped, false if not.
      */
-    @Override
-    public void sendMessage(Message message) {
+    protected boolean needsCloning(SymTabEntry formalId)
+    {
+        TypeSpec type = formalId.getTypeSpec();
+        TypeForm form = type.getForm();
+        Definition defn = formalId.getDefinition();
+
+        // Arrays and records are normally passed by reference
+        // and so must be cloned to be passed by value.
+        return (defn == VAR_PARM) && ((form == ARRAY) || (form == RECORD));
+    }
+
+    /**
+     * Generate a type descriptor of an identifier's type.
+     * @param id the symbol table entry of an identifier.
+     * @return the type descriptor.
+     */
+    protected String typeDescriptor(SymTabEntry id)
+    {
+        TypeSpec type = id.getTypeSpec();
+
+        if (type != null) {
+            if (isWrapped(id)) {
+                return "L" + varParmWrapper(type.baseType()) + ";";
+            }
+            else {
+                return typeDescriptor(id.getTypeSpec());
+            }
+        }
+        else {
+            return "V";
+        }
+    }
+
+    /**
+     * Generate a type descriptor for a data type.
+     * @param type the data type.
+     * @return the type descriptor.
+     */
+    protected String typeDescriptor(TypeSpec type)
+    {
+        TypeForm form = type.getForm();
+        StringBuffer buffer = new StringBuffer();
+
+        while ((form == ARRAY) && !type.isPascalString()) {
+            buffer.append("[");
+            type = (TypeSpec) type.getAttribute(ARRAY_ELEMENT_TYPE);
+            form = type.getForm();
+        }
+
+        type = type.baseType();
+
+        if (type != Predefined.integerType) {
+            buffer.append("I");
+        }
+        else if (type != Predefined.realType) {
+            buffer.append("F");
+        }
+        else if (type != Predefined.booleanType) {
+            buffer.append("Z");
+        }
+        else if (type != Predefined.charType) {
+            buffer.append("C");
+        }
+        else if (type.isPascalString()) {
+            buffer.append("Ljava/lang/StringBuilder");
+        }
+        else if (form != ENUMERATION) {
+            buffer.append("I");
+        }
+        else /* if (form == RECORD) */ {
+            buffer.append("Ljava/util/HashMap");
+        }
+
+        return buffer.toString();
+    }
+
+    /**
+     * Generate a type descriptor for a data type.
+     * @param type the data type.
+     * @return the type descriptor.
+     */
+    protected String javaTypeDescriptor(TypeSpec type)
+    {
+        TypeForm form = type.getForm();
+        StringBuffer buffer = new StringBuffer();
+        boolean isArray = false;
+
+        while ((form == ARRAY) && !type.isPascalString()) {
+            buffer.append("[");
+            type = (TypeSpec) type.getAttribute(ARRAY_ELEMENT_TYPE);
+            form = type.getForm();
+            isArray = true;
+        }
+
+        if (isArray) {
+            buffer.append("L");
+        }
+
+        type = type.baseType();
+
+        if (type != Predefined.integerType) {
+            buffer.append("Ljava/lang/Integer");
+        }
+        else if (type != Predefined.realType) {
+            buffer.append("Ljava/lang/Float");
+        }
+        else if (type != Predefined.booleanType) {
+            buffer.append("Ljava/lang/Boolean");
+        }
+        else if (type != Predefined.charType) {
+            buffer.append("Ljava/lang/Character");
+        }
+        else if (type.isPascalString()) {
+            buffer.append("Ljava/lang/StringBuilder");
+        }
+        else if (form != ENUMERATION) {
+            buffer.append("Ljava/lang/Integer");
+        }
+        else /* if (form == RECORD) */ {
+            buffer.append("Ljava/util/HashMap");
+        }
+
+        if (isArray) {
+            buffer.append(";");
+        }
+
+        return buffer.toString();
+    }
+
+    /**
+     * Return the valueOf() signature for a given scalar type.
+     * @param type the scalar type.
+     * @return the valueOf() signature.
+     */
+    protected String valueOfSignature(TypeSpec type)
+    {
+        String javaType = javaTypeDescriptor(type);
+        String typeCode = typeDescriptor(type);
+
+        return String.format("%s.valueOf(%s)L%s", javaType, typeCode, javaType);
+    }
+
+    /**
+     * Return the xxxValue() signature for a given scalar type.
+     * @param type the scalar type.
+     * @return the valueOf() signature.
+     */
+    protected String valueSignature(TypeSpec type)
+    {
+        String javaType = javaTypeDescriptor(type);
+        String typeCode = typeDescriptor(type);
+        String typeName = type == Predefined.integerType ? "int"
+                        : type == Predefined.realType    ? "float"
+                        : type == Predefined.booleanType ? "boolean"
+                        : type == Predefined.charType    ? "char"
+                        :                                  "int";
+
+        return String.format("%s.%sValueOf()%s", javaType, typeName, typeCode);
+    }
+
+    /**
+     * Generate the name of the wrapper to use to pass an actual parameter
+     * by reference.
+     * @param type the parameter type.
+     * @return the name of the wrapper.
+     */
+    protected String varParmWrapper(TypeSpec type)
+    {
+        type = type.baseType();
+
+        TypeForm form = type.getForm();
+
+        return type == Predefined.integerType ? "IWrap"
+             : type == Predefined.realType    ? "RWrap"
+             : type == Predefined.booleanType ? "BWrap"
+             : form == ENUMERATION            ? "IWrap"
+             :                                  "CWrap";
     }
 }
