@@ -1,6 +1,4 @@
-package wci.backend.compiler.generators;
-
-import wci.backend.compiler.CodeGenerator;
+package wci.backend.compiler;
 
 public class ProgramGenerator extends CodeGenerator {
     public ProgramGenerator(CodeGenerator codeGenerator) {
