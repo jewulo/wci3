@@ -3,10 +3,8 @@ package wci.backend.compiler;
 import java.io.*;
 
 import wci.backend.*;
-import wci.backend.compiler.generators.*;
 import wci.intermediate.*;
 import wci.intermediate.symtabimpl.*;
-import wci.intermediate.typeimpl.TypeFormImpl;
 import wci.message.*;
 
 import static wci.intermediate.symtabimpl.DefinitionImpl.*;
@@ -223,17 +221,445 @@ public class CodeGenerator extends Backend
         ++instructionCount;
     }
 
+    /**
+     * Emit 0-operand instruction.
+     * @param opcode the operation code.
+     */
+    protected void emit(Instruction opcode)
+    {
+        assemblyFile.println("\t" + opcode.toString());
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit 1-operand instruction.
+     * @param opcode the operation code.
+     * @param operand the operand text.
+     */
+    protected void emit(Instruction opcode, String operand)
+    {
+        assemblyFile.println("\t" + opcode.toString() + "\t" + operand);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit 1-operand instruction.
+     * @param opcode the operation code.
+     * @param operand the operand value.
+     */
+    protected void emit(Instruction opcode, int operand)
+    {
+        assemblyFile.println("\t" + opcode.toString() + "\t" + operand);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit 1-operand instruction.
+     * @param opcode the operation code.
+     * @param operand the operand value.
+     */
+    protected void emit(Instruction opcode, float operand)
+    {
+        assemblyFile.println("\t" + opcode.toString() + "\t" + operand);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit 1-operand instruction.
+     * @param opcode the operation code.
+     * @param label the operand value.
+     */
+    protected void emit(Instruction opcode, Label label)
+    {
+        assemblyFile.println("\t" + opcode.toString() + "\t" + label);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit 2-operand instruction.
+     * @param opcode the operation code.
+     * @param operand1 the value of the first operand.
+     * @param operand2 the value of the second operand.
+     */
+    protected void emit(Instruction opcode, int operand1, int operand2)
+    {
+        assemblyFile.println("\t" + opcode.toString() + "\t" + operand1 + " " + operand2);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
+    /**
+     * Emit 2-operand instruction.
+     * @param opcode the operation code.
+     * @param operand1 the text of the first operand.
+     * @param operand2 the text of the second operand.
+     */
+    protected void emit(Instruction opcode, String operand1, String operand2)
+    {
+        assemblyFile.println("\t" + opcode.toString() + "\t" + operand1 + " " + operand2);
+        assemblyFile.flush();
+        ++instructionCount;
+    }
+
     // =====
     // Loads
     // =====
+
+    /**
+     * Emit a load of an integer constant value.
+     * @param value the constant value.
+     */
+    protected void emitLoadConstant(int value)
+    {
+        switch (value)
+        {
+            case -1: emit(ICONST_M1); break;
+            case 0: emit(ICONST_0); break;
+            case 1: emit(ICONST_1); break;
+            case 2: emit(ICONST_2); break;
+            case 3: emit(ICONST_3); break;
+            case 4: emit(ICONST_4); break;
+            case 5: emit(ICONST_5); break;
+
+            default: {
+                if ((-128 <= value) && (value <= 127)) {
+                    emit(BIPUSH, value);
+                }
+                else if ((-32768 <= value) && (value <= 32767)) {
+                    emit(SIPUSH, value);
+                }
+                else {
+                    emit(LDC, value);
+                }
+            }
+        }
+    }
+
+    /**
+     * Emit a load of a real constant value.
+     * @param value the constant value.
+     */
+    protected void emitLoadConstant(float value)
+    {
+        if (value == 0.0f) {
+            emit(FCONST_0);
+        }
+        else if (value == 1.0f) {
+            emit(FCONST_1);
+        }
+        else if (value == 2.0f) {
+            emit(FCONST_2);
+        }
+        else {
+            emit(LDC, value);
+        }
+    }
+
+    /**
+     * Emit a load of a string constant value.
+     * @param value the constant value.
+     */
+    protected void emitLoadConstant(String value)
+    {
+        emit(LDC, "\"" + value + "\"");
+    }
+
+    /**
+     * Emit a load instruction for a local variable.
+     * @param type the variable's data type.
+     * @param index the variable's index into the local variables array.
+     */
+    protected void emitLoadLocal(TypeSpec type, int index)
+    {
+        TypeForm form = null;
+
+        if (type != null) {
+            type = type.baseType();
+            form = type.getForm();
+        }
+
+        if ((type == Predefined.integerType) ||
+            (type == Predefined.booleanType) ||
+            (type == Predefined.charType)    ||
+            (form == ENUMERATION))
+        {
+            switch (index) {
+                case 0:     emit(ILOAD_0); break;
+                case 1:     emit(ILOAD_1); break;
+                case 2:     emit(ILOAD_2); break;
+                case 3:     emit(ILOAD_3); break;
+                default:    emit(ILOAD, index);
+            }
+        }
+        else if (type == Predefined.realType) {
+            switch (index) {
+                case 0:     emit(FLOAD_0); break;
+                case 1:     emit(FLOAD_1); break;
+                case 2:     emit(FLOAD_2); break;
+                case 3:     emit(FLOAD_3); break;
+                default:    emit(FLOAD, index);
+            }
+        }
+        else {
+            switch (index) {
+                case 0:     emit(ALOAD_0); break;
+                case 1:     emit(ALOAD_1); break;
+                case 2:     emit(ALOAD_2); break;
+                case 3:     emit(ALOAD_3); break;
+                default:    emit(ALOAD, index);
+            }
+        }
+    }
+
+    /**
+     * Emit code to load the value of a variable, which can be
+     * a program variable, a local variable, or a VAR parameter.
+     * @param variableId the variable's symbol table entry.
+     */
+    protected void emitLoadVariable(SymTabEntry variableId)
+    {
+        TypeSpec variableType = variableId.getTypeSpec().baseType();
+        int nestingLevel = variableId.getSymTab().getNestingLevel();
+
+        // Program Variable.
+        if (nestingLevel == 1) {
+            String programName = symTabStack.getProgramId().getName();
+            String variableName = variableId.getName();
+            String name = programName + "/" + variableName;
+
+            emit(GETSTATIC, name, typeDescriptor(variableType));
+        }
+
+        // Wrapped Variable.
+        else if (isWrapped(variableId)) {
+           int index = (Integer) variableId.getAttribute(INDEX);
+           emitLoadLocal(null, index);
+           emit(GETSTATIC, varParmWrapper(variableType) + "/value",
+                                    typeDescriptor(variableType));
+        }
+
+        // Local Variable.
+        else {
+            int index = (Integer) variableId.getAttribute(INDEX);
+            emitLoadLocal(variableType, index);
+        }
+    }
+
+    /**
+     * Emit a load of an array element.
+     * @param elmtType the element type if character, else null.
+     */
+    protected void emitLoadArrayElement(TypeSpec elmtType)
+    {
+        TypeForm form = null;
+
+        if (elmtType != null) {
+            elmtType = elmtType.baseType();
+            form = elmtType.getForm();
+        }
+
+        // Load a character from a string.
+        if (elmtType == Predefined.charType) {
+            emit(INVOKEVIRTUAL, "java/lang/StringBuilder.charAt(I)C");
+        }
+
+        // Load an array element.
+        else {
+            emit(       elmtType == Predefined.integerType  ? IALOAD
+                    :   elmtType == Predefined.realType     ? FALOAD
+                    :   elmtType == Predefined.booleanType  ? BALOAD
+                    :   elmtType == Predefined.charType     ? CALOAD
+                    :   form == ENUMERATION                 ? IALOAD
+                    :                                         AALOAD);
+        }
+    }
 
     // ======
     // Stores
     // ======
 
+    /**
+     * Emit a store instruction into the local variable.
+     * @param type the data type of the variable.
+     * @param index the local variable.
+     */
+    protected void emitStoreLocal(TypeSpec type, int index)
+    {
+        TypeForm form = null;
+
+        if (type != null) {
+            type = type.baseType();
+            form = type.getForm();
+        }
+
+        if ((type == Predefined.integerType) ||
+            (type == Predefined.booleanType) ||
+            (type == Predefined.charType) ||
+            (form == ENUMERATION))
+        {
+            switch (index) {
+                case 0 :    emit(ISTORE_0); break;
+                case 1 :    emit(ISTORE_1); break;
+                case 2 :    emit(ISTORE_2); break;
+                case 3 :    emit(ISTORE_3); break;
+                default:    emit(ISTORE, index);
+            }
+        }
+        else if (type == Predefined.realType)
+        {
+            switch (index) {
+                case 0 :    emit(FSTORE_0); break;
+                case 1 :    emit(FSTORE_1); break;
+                case 2 :    emit(FSTORE_2); break;
+                case 3 :    emit(FSTORE_3); break;
+                default:    emit(FSTORE, index);
+            }
+        }
+        else
+        {
+            switch (index) {
+                case 0 :    emit(ASTORE_0); break;
+                case 1 :    emit(ASTORE_1); break;
+                case 2 :    emit(ASTORE_2); break;
+                case 3 :    emit(ASTORE_3); break;
+                default:    emit(ASTORE, index);
+            }
+        }
+    }
+
+    /**
+     * Emit code to store a value into a variable, which can be
+     * a program variable, a local variable, or a VAR parameter.
+     * @param variableId the symbol table entry of the variable.
+     */
+    protected void emitStoreVariable(SymTabEntry variableId)
+    {
+        int nestingLevel = variableId.getSymTab().getNestingLevel();
+        int index = (Integer) variableId.getAttribute(INDEX);
+
+        emitStoreVariable(variableId, nestingLevel, index);
+    }
+
+    /**
+     * Emit code to store a value into a variable, which can be
+     * a program variable, a local variable, or a VAR parameter.
+     * @param variableId the symbol table entry of the variable.
+     * @param nestingLevel the variable's nesting level.
+     * @param index the variable's index.
+     */
+    protected void emitStoreVariable(SymTabEntry variableId, int nestingLevel, int index)
+    {
+        TypeSpec variableType = variableId.getTypeSpec();
+
+        // Program variable.
+        if (nestingLevel == 1) {
+            String targetName = variableId.getName();
+            String programName = symTabStack.getProgramId().getName();
+            String name = programName + "/" + targetName;
+
+            emitRangeCheck(variableType);
+            emit(PUTSTATIC, name, typeDescriptor(variableType.baseType()));
+        }
+
+        // Wrapped Parameter: Set the wrapper's value field.
+        else if (isWrapped(variableId)) {
+            emitRangeCheck(variableType);
+            emit(PUTFIELD,varParmWrapper(variableType.baseType()) + "/value",
+                            typeDescriptor(variableType.baseType()));
+        }
+
+        // Local variable.
+        else {
+            emitRangeCheck(variableType);
+            emitStoreLocal(variableType.baseType(), index);
+        }
+    }
+
+    /**
+     * Emit a store of an array element.
+     * @param elmType the element type.
+     */
+    protected void emitStoreArray(TypeSpec elmType)
+    {
+        TypeForm form = null;
+
+        if (elmType != null) {
+            elmType = elmType.baseType();
+            form = elmType.getForm();
+        }
+
+        if (elmType == Predefined.charType) {
+            emit(INVOKEVIRTUAL, "java/lang/StringBuilder.setCharAT(IC)V");
+        }
+        else {
+            emit(       elmType == Predefined.integerType   ? IASTORE
+                    :   elmType == Predefined.realType      ? FASTORE
+                    :   elmType == Predefined.booleanType   ? BASTORE
+                    :   elmType == Predefined.charType      ? CASTORE
+                    :   form    == ENUMERATION              ? IASTORE
+                    :                                         AASTORE);
+        }
+    }
+
     // ======================
     // Miscellaneous Emitters
     // ======================
+
+    /**
+     * Emit the CHECKCAST instruction for a scalar type.
+     * @param type the data type.
+     */
+    protected void emitCheckCast(TypeSpec type)
+    {
+        String descriptor = typeDescriptor(type);
+
+        // Don't bracket the type with L; if it is not an array.
+        if (descriptor.charAt(0) == 'L') {
+            descriptor = descriptor.substring(1, descriptor.length()-1);
+        }
+
+        emit(CHECKCAST, descriptor);
+    }
+
+    /**
+     * Emit the CHECKCAST instruction for a class.
+     * @param type the data type.
+     */
+    protected void emitCheckCastClass(TypeSpec type)
+    {
+        String descriptor = javaTypeDescriptor(type);
+
+        // Don't bracket the type with L; if it is not an array.
+        if (descriptor.charAt(0) == 'L') {
+            descriptor = descriptor.substring(1, descriptor.length()-1);
+        }
+
+        emit(CHECKCAST, descriptor);
+    }
+
+    /**
+     * Emit code to perform a runtime range check before an assignment.
+     * @param targetType the type of the assignment target.
+     */
+    protected void emitRangeCheck(TypeSpec targetType)
+    {
+        if (targetType.getForm() == SUBRANGE) {
+            int min = (Integer) targetType.getAttribute(SUBRANGE_MIN_VALUE);
+            int max = (Integer) targetType.getAttribute(SUBRANGE_MAX_VALUE);
+
+            emit(DUP);
+            emitLoadConstant(min);
+            emitLoadConstant(max);
+            emit(INVOKESTATIC, "RangeChecker/check(III)V");
+
+            localStack.use(3);
+        }
+    }
 
     // =========
     // Utilities
