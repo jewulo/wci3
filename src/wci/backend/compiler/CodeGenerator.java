@@ -437,7 +437,7 @@ public class CodeGenerator extends Backend
 
         // Wrapped Variable.
         else if (isWrapped(variableId)) {
-           int index = (Integer) variableId.getAttribute(INDEX);
+           int index = (Integer) variableId.getAttribute(SLOT);
            emitLoadLocal(null, index);
            emit(GETSTATIC, varParmWrapper(variableType) + "/value",
                                     typeDescriptor(variableType));
@@ -445,7 +445,7 @@ public class CodeGenerator extends Backend
 
         // Local Variable.
         else {
-            int index = (Integer) variableId.getAttribute(INDEX);
+            int index = (Integer) variableId.getAttribute(SLOT);
             emitLoadLocal(variableType, index);
         }
     }
@@ -540,7 +540,7 @@ public class CodeGenerator extends Backend
     protected void emitStoreVariable(SymTabEntry variableId)
     {
         int nestingLevel = variableId.getSymTab().getNestingLevel();
-        int index = (Integer) variableId.getAttribute(INDEX);
+        int index = (Integer) variableId.getAttribute(SLOT);
 
         emitStoreVariable(variableId, nestingLevel, index);
     }
