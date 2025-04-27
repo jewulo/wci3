@@ -626,6 +626,34 @@ public class CodeGenerator extends Backend
     }
 
     /**
+     * Emit a function return of a value.
+     * @param type the type of the return value.
+     */
+    protected void emitReturnValue(TypeSpec type)
+    {
+        TypeForm form = null;
+        
+        if (type != null) {
+            type = type.baseType();
+            form = form.getForm();
+        }
+        
+        if ((type == Predefined.integerType) ||
+            (type == Predefined.booleanType) ||
+            (type == Predefined.charType) ||
+            (form == ENUMERATION))
+        {
+            emit(IRETURN);
+        }
+        else if (type == Predefined.realType) {
+            emit(FRETURN);
+        }
+        else {
+            emit(ARETURN);
+        }
+    }
+    
+    /**
      * Emit the CHECKCAST instruction for a class.
      * @param type the data type.
      */

@@ -15,6 +15,7 @@ import java.util.EnumSet;
 import static wci.frontend.pascal.PascalErrorCode.*;
 import static wci.frontend.pascal.PascalTokenType.*;
 import static wci.intermediate.symtabimpl.DefinitionImpl.*;
+import static wci.intermediate.symtabimpl.SymTabKeyImpl.SLOT;
 
 /**
  * <h1>VariableDeclarationsParser.</h1>
@@ -183,6 +184,10 @@ public class VariableDeclarationsParser extends DeclarationsParser
                 id = symTabStack.enterLocal(name);
                 id.setDefinition(definition);
                 id.appendLineNumber(token.getLineNumber());
+
+                // Set its slot number in the local variables array.
+                int slot = id.getSymTab().nextSlotNumber();
+                id.setAttribute(SLOT, slot);
             }
             else {
                 errorHandler.flag(token, IDENTIFIER_REDEFINED, this);
