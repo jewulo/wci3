@@ -3,14 +3,13 @@ package wci.backend.compiler;
 import java.io.*;
 
 import wci.backend.*;
+import wci.backend.compiler.generators.ProgramGenerator;
 import wci.intermediate.*;
 import wci.intermediate.symtabimpl.*;
 import wci.message.*;
 
 import static wci.intermediate.symtabimpl.DefinitionImpl.*;
 import static wci.intermediate.symtabimpl.SymTabKeyImpl.*;
-import static wci.intermediate.icodeimpl.ICodeNodeTypeImpl.*;
-import static wci.intermediate.icodeimpl.ICodeKeyImpl.*;
 import static wci.intermediate.typeimpl.TypeFormImpl.*;
 import static wci.intermediate.typeimpl.TypeKeyImpl.*;
 import static wci.backend.compiler.Instruction.*;

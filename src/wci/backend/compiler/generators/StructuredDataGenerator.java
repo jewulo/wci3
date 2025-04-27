@@ -30,6 +30,5 @@ public class StructuredDataGenerator extends CodeGenerator
     @Override
     public void generate(SymTabEntry routineId) //throws PascalCompilerException
     {
-        //super.generate(node);
     }
 }
