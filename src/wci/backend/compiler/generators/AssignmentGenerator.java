@@ -37,6 +37,41 @@ public class AssignmentGenerator extends StatementGenerator
      */
     public void generate(ICodeNode node)
     {
+        TypeSpec assignmentType = node.getTypeSpec();
+
+        // The ASSIGN node's children are the target variable
+        // and the expression.
+        ArrayList<ICodeNode> assignChildren = node.getChildren();
+        ICodeNode targetNode = assignChildren.get(0);
+        ICodeNode exprNode = assignChildren.get(1);
+
+        SymTabEntry targetId = (SymTabEntry) targetNode.getAttribute(ID);
+        TypeSpec targetType = targetId.getTypeSpec();
+        TypeSpec exprType = exprNode.getTypeSpec();
+        ExpressionGenerator expressionGenerator = new ExpressionGenerator(this);
+
+        int slot;           // local variable array slot number of the target.
+        int nestingLevel;   // nesting level of the target.
+        SymTab symTab;      // symbol table that contains the target id.
+
+        // Assign a function value. Use the slot number of the function value.
+        if (targetId.getDefinition() == DefinitionImpl.FUNCTION) {
+            slot = (Integer) targetId.getAttribute(SLOT);
+            nestingLevel = 2;
+        }
+
+        // Standard assignment.
+        else {
+            symTab = targetId.getSymTab();
+            slot = (Integer) targetId.getAttribute(SLOT);
+            nestingLevel = symTab.getNestingLevel();
+        }
+
+        // Generate code for the assignment.
+        generateScalarAssignment(targetType, targetId,
+                                 slot, nestingLevel, exprNode, exprType,
+                                 expressionGenerator);
+
     }
 
     /**
@@ -55,5 +90,37 @@ public class AssignmentGenerator extends StatementGenerator
                                           ICodeNode exprNode,
                                           TypeSpec exprType,
                                           ExpressionGenerator exprGenerator)
-    {}
+    {
+        // Generate code to evaluate the expression.
+        // Special cases: float variable := integer constant
+        //                float variable := integer expression
+        //                char variable  := single-character string constant
+        if (targetType == Predefined.realType) {
+            if (exprNode.getType() == INTEGER_CONSTANT) {
+                int value = (Integer) exprNode.getAttribute(VALUE);
+                emitLoadConstant((float) value);
+                localStack.increase(1);
+            }
+            else {
+                exprGenerator.generate(exprNode);
+
+                if (exprType == Predefined.integerType) {
+                    emit(I2F);
+                }
+            }
+        }
+        else if ((targetType == Predefined.charType) &&
+                 (exprNode.getType() == STRING_CONSTANT)) {
+            int value = ((String) exprNode.getAttribute(VALUE)).charAt(0);
+            emitLoadConstant(value);
+            localStack.increase(1);
+        }
+        else {
+            exprGenerator.generate(exprNode);
+        }
+
+        // Generate code to store the expression value into the target variable.
+        emitStoreVariable(targetId, nestingLevel, index);
+        localStack.decrease(isWrapped(targetId) ? 2 : 1);
+    }
 }

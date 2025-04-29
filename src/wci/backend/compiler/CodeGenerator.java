@@ -632,10 +632,10 @@ public class CodeGenerator extends Backend
     protected void emitReturnValue(TypeSpec type)
     {
         TypeForm form = null;
-        
+
         if (type != null) {
             type = type.baseType();
-            form = form.getForm();
+            form = type.getForm();
         }
         
         if ((type == Predefined.integerType) ||
