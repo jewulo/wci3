@@ -169,7 +169,7 @@ public class ProgramGenerator extends CodeGenerator
     private void generateMainMethodCode()
             throws PascalCompilerException
     {
-        ICode iCode = (ICode) programId.getAttribute(ROUTINE_CODE);
+        ICode iCode = (ICode) programId.getAttribute(ROUTINE_ICODE);
         ICodeNode root = iCode.getRoot();
 
         emitBlankLine();
