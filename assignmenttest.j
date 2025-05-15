@@ -80,6 +80,7 @@
 	fcmpg
 	iflt	L001
 	iconst_0
+
 	goto	L002
 L001:
 	iconst_1
