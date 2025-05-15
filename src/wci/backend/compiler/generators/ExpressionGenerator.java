@@ -123,6 +123,15 @@ public class ExpressionGenerator extends StatementGenerator {
                 break;
             }
 
+            case CALL: {
+
+                // Generate code to call a function.
+                CallGenerator callGenerator = new CallGenerator(this);
+                callGenerator.generate(node);
+
+                break;
+            }
+
             // Must be binary operator
             default: generateBinaryOperator(node, nodeType);
         }

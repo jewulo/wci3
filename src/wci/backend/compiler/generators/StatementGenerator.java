@@ -59,6 +59,12 @@ public class StatementGenerator extends CodeGenerator
                 assignmentGenerator.generate(node);
                 break;
             }
+
+            case CALL: {
+                CallGenerator callGenerator = new CallGenerator(this);
+                callGenerator.generate(node);
+                break;
+            }
         }
 
         // Verify that the stack height after each statement is 0.
