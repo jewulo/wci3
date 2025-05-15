@@ -21,7 +21,7 @@ public class CallDeclaredGenerator extends CallGenerator
      * Constructor.
      * @param parent the parent executor.
      */
-    public CallDeclaredGenerator(CallGenerator parent)
+    public CallDeclaredGenerator(CodeGenerator parent)
     {
         super(parent);
     }
@@ -124,17 +124,88 @@ public class CallDeclaredGenerator extends CallGenerator
         }
     }
 
-    private void generateWrap(ICodeNode actualNode, TypeSpec formalType, Integer wrapSlot, ExpressionGenerator exprGenerator) {
+    /**
+     * Wrap an actual parameter to pass it by reference in a procedure or function call.
+     * @param actualNode the parse tree of the actual parameter.
+     * @param formalType the type specification of the formal parameter.
+     * @param wrapSlot the slot number of the wrapper.
+     * @param exprGenerator the expression code generator.
+     */
+    private void generateWrap(ICodeNode actualNode, TypeSpec formalType, Integer wrapSlot, ExpressionGenerator exprGenerator)
+    {
+        // Wrap the value of the actual parameter.
+        String wrapper = varParmWrapper(formalType);    // selected wrapper.
+
+        // Create the wrapper.
+        emit(NEW, wrapper);
+        emit(DUP);
+        localStack.increase(2);
+
+        // Generate code to evaluate the actual parameter value.
+        exprGenerator.generate(actualNode);
+
+        // Invoke the wrapper's constructor to wrap the parameter
+        String init = wrapper + "/<init>(" + typeDescriptor(formalType) + ")V";
+        emit(INVOKENONVIRTUAL, init);
+        localStack.decrease(1);
+
+        // Store wrapper's address into a temporary and leave a copy on the operand stack.
+        emit(DUP);
+        emitStoreLocal(null, wrapSlot);
+        localStack.use(1);
     }
 
-    private void cloneActualParameter(TypeSpec formalType) {
+    /**
+     * Clone an actual parameter value to be passed by value in a procedure or function call.
+     * @param formalType the type specification of the formal parameter.
+     */
+    private void cloneActualParameter(TypeSpec formalType)
+    {
+        emit(INVOKESTATIC, "Cloner.deepClone(Ljava/lang/Object;)" + "Ljava/lang/Object;");
+        emitCheckCast(formalType);
     }
 
+    /**
+     * Generate code to make the call.
+     * @param callNode the CALL parse tree node.
+     */
     private void generateCall(ICodeNode callNode)
     {
+        SymTabEntry routineId = (SymTabEntry) callNode.getAttribute(ID);
+        String routineName = routineId.getName();
+        ArrayList<SymTabEntry> parmIds = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARAMS);
+        StringBuilder buffer = new StringBuilder();
+
+        // Procedure or function name.
+        buffer.append(programName);
+        buffer.append("/");
+        buffer.append(routineName);
+        buffer.append("(");
+
+        // Parameter abd return type descriptors.
+        if (parmIds != null) {
+            for (SymTabEntry parmId : parmIds) {
+                buffer.append(typeDescriptor(parmId));
+            }
+        }
+        buffer.append(")");
+        buffer.append(typeDescriptor(routineId));
+
+        // Generate call to the routine
+        emit(INVOKESTATIC, buffer.toString());
+
+        if (parmIds != null) {
+            localStack.decrease(parmIds.size());
+        }
     }
+
+    /**
+     * Generate code for the call epilogue.
+     * @param callNode the CALL parse tree node.
+     */
     private void generateCallEpilogue(ICodeNode callNode)
     {
+
     }
 
 
