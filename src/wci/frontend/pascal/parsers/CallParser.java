@@ -19,7 +19,7 @@ import static wci.intermediate.symtabimpl.DefinitionImpl.VAR_PARM;
 import static wci.intermediate.symtabimpl.RoutineCodeImpl.DECLARED;
 import static wci.intermediate.symtabimpl.RoutineCodeImpl.FORWARD;
 import static wci.intermediate.symtabimpl.SymTabKeyImpl.ROUTINE_CODE;
-import static wci.intermediate.symtabimpl.SymTabKeyImpl.ROUTINE_PARAMS;
+import static wci.intermediate.symtabimpl.SymTabKeyImpl.ROUTINE_PARMS;
 import static wci.intermediate.typeimpl.TypeFormImpl.SCALAR;
 import static wci.intermediate.typeimpl.TypeFormImpl.SUBRANGE;
 
@@ -88,7 +88,7 @@ public class CallParser extends StatementParser {
         int parmIndex = -1;
         
         if (isDeclared) {
-            formalParms = (ArrayList<SymTabEntry>) pfId.getAttribute(ROUTINE_PARAMS);
+            formalParms = (ArrayList<SymTabEntry>) pfId.getAttribute(ROUTINE_PARMS);
             parmCount = formalParms != null ? formalParms.size() : 0; 
         }
         

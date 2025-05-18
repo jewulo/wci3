@@ -33,7 +33,7 @@ public class CallDeclaredGenerator extends CallGenerator
     @Override
     public void generate(ICodeNode node)
     {
-        // Generate code for any actual parameters
+        // Generate code for any actual parameters.
         if (node.getChildren().size() > 0) {
             generateActualParms(node);
         }
@@ -62,7 +62,7 @@ public class CallDeclaredGenerator extends CallGenerator
         SymTabEntry routineId = (SymTabEntry) callNode.getAttribute(ID);
         ICodeNode paramNode = callNode.getChildren().get(0);
         ArrayList<ICodeNode> actualNodes = paramNode.getChildren();
-        ArrayList<SymTabEntry> formalIds = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARAMS);
+        ArrayList<SymTabEntry> formalIds = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARMS);
         ExpressionGenerator exprGenerator = new ExpressionGenerator(this);
 
         // Iterate over the formal parameters.
@@ -173,7 +173,7 @@ public class CallDeclaredGenerator extends CallGenerator
     {
         SymTabEntry routineId = (SymTabEntry) callNode.getAttribute(ID);
         String routineName = routineId.getName();
-        ArrayList<SymTabEntry> parmIds = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARAMS);
+        ArrayList<SymTabEntry> parmIds = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARMS);
         StringBuilder buffer = new StringBuilder();
 
         // Procedure or function name.
@@ -205,7 +205,59 @@ public class CallDeclaredGenerator extends CallGenerator
      */
     private void generateCallEpilogue(ICodeNode callNode)
     {
+        SymTabEntry routineId = (SymTabEntry) callNode.getAttribute(ID);
+        ICodeNode parmsNode = callNode.getChildren().get(0);
+        ArrayList<ICodeNode> actualNodes = parmsNode.getChildren();
+        ArrayList<SymTabEntry> formalIds = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARMS);
 
+        // Iterate over the formal parameters.
+        for (int i = 0; i < formalIds.size(); ++i) {
+            SymTabEntry formalId = formalIds.get(i);
+            ICodeNode actualNode = actualNodes.get(i);
+            TypeSpec formalType = formalId.getTypeSpec();
+
+            // Wrapped parameters only.
+            if (isWrapped(formalId)) {
+                SymTabEntry actualId = (SymTabEntry) actualNode.getAttribute(ID);
+
+                // If the actual parameter is itself a VAR parameter.
+                // Keep it wrapped. Otherwise, unwrap its value.
+                if (actualId.getDefinition() != VAR_PARM) {
+                    generateUnwrap(actualId, formalType, programName);
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate the code to unwrap an actual parameter value.
+     * @param actualId the symbol table entry for the actual identifier.
+     * @param formalType the type specification of the formal parameter.
+     * @param programName the name of the program.
+     */
+    private void generateUnwrap(SymTabEntry actualId, TypeSpec formalType, String programName)
+    {
+        SymTab symTab = actualId.getSymTab();
+        int actualSlot = (Integer) actualId.getAttribute(SLOT);
+        int wrapSlot = (Integer) actualId.getAttribute(WRAP_SLOT);
+        String typeDesc = typeDescriptor(formalType);
+        int nestingLevel = symTab.getNestingLevel();
+        String wrapper = varParmWrapper(formalType);    // selected wrapper
+
+        // Load the wrapper and get its value.
+        emitLoadLocal(null, wrapSlot);
+        emit(GETFIELD, wrapper + "/value", typeDesc);
+
+        // Store the value back into the original variable.
+        if (nestingLevel == 1) {
+            String actualName = programName + "/" + actualId.getName();
+            emit(PUTSTATIC, actualName, typeDesc);
+        }
+        else {
+            emitStoreLocal(formalType, actualSlot);
+        }
+
+        localStack.use(1, 2);
     }
 
 

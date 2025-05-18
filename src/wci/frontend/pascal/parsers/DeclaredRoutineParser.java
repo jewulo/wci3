@@ -2,7 +2,6 @@ package wci.frontend.pascal.parsers;
 
 import wci.frontend.Token;
 import wci.frontend.TokenType;
-import wci.frontend.pascal.PascalErrorCode;
 import wci.frontend.pascal.PascalParserTD;
 import wci.frontend.pascal.PascalTokenType;
 import wci.intermediate.*;
@@ -11,7 +10,6 @@ import wci.intermediate.symtabimpl.Predefined;
 import wci.intermediate.typeimpl.TypeFormImpl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 
 import static wci.frontend.pascal.PascalErrorCode.*;
@@ -309,7 +307,7 @@ public class DeclaredRoutineParser extends DeclarationsParser
                 errorHandler.flag(token, MISSING_RIGHT_PAREN, this);
             }
 
-            routineId.setAttribute(ROUTINE_PARAMS, parms);
+            routineId.setAttribute(ROUTINE_PARMS, parms);
         }
     }
 

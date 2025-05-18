@@ -37,7 +37,7 @@ public class CallDeclaredExecutor extends CallExecutor
         if (node.getChildren().size() > 0) {
             ICodeNode parmsNode = node.getChildren().get(0);
             ArrayList<ICodeNode> actualNodes = parmsNode.getChildren();
-            ArrayList<SymTabEntry> formalId = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARAMS);
+            ArrayList<SymTabEntry> formalId = (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARMS);
             executeActualParms(actualNodes, formalId, newAr);
         }
 

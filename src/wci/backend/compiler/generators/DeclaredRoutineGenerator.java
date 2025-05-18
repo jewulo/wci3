@@ -3,7 +3,6 @@ package wci.backend.compiler.generators;
 import java.util.ArrayList;
 
 import wci.intermediate.*;
-import wci.intermediate.symtabimpl.*;
 import wci.backend.compiler.*;
 
 import static wci.intermediate.symtabimpl.SymTabKeyImpl.*;
@@ -71,7 +70,7 @@ public class DeclaredRoutineGenerator extends CodeGenerator
     {
         String routineName = routineId.getName();
         ArrayList<SymTabEntry> parmIds =
-                (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARAMS);
+                (ArrayList<SymTabEntry>) routineId.getAttribute(ROUTINE_PARMS);
         StringBuilder buffer = new StringBuilder();
 
         // Procedure or function name.
