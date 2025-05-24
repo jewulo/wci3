@@ -84,15 +84,51 @@ public class CallStandardGenerator extends CallGenerator {
      * @param callNode the CALL node.
      * @param routineCode the routine code.
      */
-    private void generateReadReadln(ICodeNode callNode, RoutineCode routineCode) {
-    }
+    private void generateReadReadln(ICodeNode callNode, RoutineCode routineCode)
+    {
+        ICodeNode parmsNode = callNode.getChildren().size() > 0
+                                ? callNode.getChildren().get(0)
+                                : null;
+        String programName = symTabStack.getProgramId().getName();
+        String standardInName = programName + "/_standardIn";
 
-    /**
-     * Generate code for a call to write or writeln.
-     * @param callNode the CALL node.
-     * @param routineCode the routine code.
-     */
-    private void generateWriteWriteln(ICodeNode callNode, RoutineCode routineCode) {
+        if (parmsNode != null) {
+            ArrayList<ICodeNode> actuals = parmsNode.getChildren();
+
+            // Loop to process each actual parameter.
+            for (ICodeNode actualNode : actuals) {
+                SymTabEntry variableId = (SymTabEntry) actualNode.getAttribute(ID);
+                TypeSpec actualType = actualNode.getTypeSpec();
+                TypeSpec baseType = actualType.baseType();
+
+                // Generate code to call the appropriate PascalTextIn method
+                emit(GETSTATIC, standardInName, "LPascalTextIn;");
+                if (baseType == Predefined.integerType) {
+                    emit(INVOKEVIRTUAL, "PascalTextIn.readInteger()I");
+                }
+                else if (baseType == Predefined.realType) {
+                    emit(INVOKEVIRTUAL, "PascalTextIn.readReal()F");
+                }
+                else if (baseType == Predefined.booleanType) {
+                    emit(INVOKEVIRTUAL, "PascalTextIn.readChar()C");
+                }
+
+                localStack.increase(1);
+
+                // Store the value that was read into the actual parameter
+                emitStoreVariable(variableId);
+
+                localStack.decrease(1);
+            }
+        }
+
+        // READLN: Skip the rest of the input line.
+        if (routineCode == READLN) {
+            emit(GETSTATIC, standardInName, "LPascalTextIn;");
+            emit(INVOKEVIRTUAL, "PascalTextIn.nextLine()V");
+
+            localStack.use(1);
+        }
     }
 
     /**
@@ -100,7 +136,166 @@ public class CallStandardGenerator extends CallGenerator {
      * @param callNode the CALL node.
      * @param routineCode the routine code.
      */
-    private void generateEofEoln(ICodeNode callNode, RoutineCode routineCode) {
+    private void generateEofEoln(ICodeNode callNode, RoutineCode routineCode)
+    {
+        String programName = symTabStack.getProgramId().getName();
+        String standardInName = programName + "/_standardIn";
+
+        // Generate code to call the appropriate PascalTextIn method.
+        emit(GETSTATIC, standardInName, "LPascalTextIn;");
+        if (routineCode == EOLN) {
+            emit(INVOKEVIRTUAL, "PascalTextIn.atEoln()Z");
+        }
+        else {
+            emit(INVOKEVIRTUAL, "PascalTextIn.atEof()Z");
+        }
+
+        localStack.increase(1);
+    }
+
+    /**
+     * Generate code for a call to write or writeln.
+     * @param callNode the CALL node.
+     * @param routineCode the routine code.
+     */
+    private void generateWriteWriteln(ICodeNode callNode, RoutineCode routineCode)
+    {
+        ICodeNode parmsNode = callNode.getChildren().size() > 0
+                                ? callNode.getChildren().get(0)
+                                : null;
+        StringBuilder buffer = new StringBuilder();
+        int exprCount = 0;
+
+        buffer.append("\"");
+
+        // There are actual parameters.
+        if (parmsNode != null) {
+            ArrayList<ICodeNode> actuals = parmsNode.getChildren();
+
+            // Loop to process each WRITE parameter and build the format string.
+            for (ICodeNode writeParmNode : actuals) {
+                ArrayList<ICodeNode> children = writeParmNode.getChildren();
+                ICodeNode exprNode = children.get(0);
+                ICodeNodeType nodeType = exprNode.getType();
+
+                // Append string constants directly to the format string.
+                if (nodeType == STRING_CONSTANT) {
+                    String str = (String) exprNode.getAttribute(VALUE);
+                    buffer.append(str.replaceAll("%", "%%"));
+                }
+
+                // Create and append the appropriate format specification.
+                else {
+                    TypeSpec dataType = exprNode.getTypeSpec().baseType();
+                    String typeCode = dataType.isPascalString()     ? "s"
+                            : dataType == Predefined.integerType    ? "d"
+                            : dataType == Predefined.realType       ? "f"
+                            : dataType == Predefined.booleanType    ? "s"
+                            : dataType == Predefined.charType       ? "c"
+                            :                                         "s";
+
+                    ++exprCount; // count the non-constant string parameters
+                    buffer.append("%");
+
+                    // Process any field width and precision values
+                    if (children.size() > 1) {
+                        int w = (Integer) children.get(1).getAttribute(VALUE);
+                        buffer.append(w == 0 ? 1 : w);
+                    }
+
+                    if (children.size() > 2) {
+                        int p = (Integer) children.get(2).getAttribute(VALUE);
+                        buffer.append(".");
+                        buffer.append(p == 0 ? 1 : p);
+                    }
+
+                    buffer.append(typeCode);
+                }
+            }
+
+            buffer.append(routineCode == WRITELN ? "\\n\"" : "\"");
+        }
+
+        emit(GETSTATIC, "java/lang/System/out", "Ljava/io/PrintStream;");
+        localStack.increase(1);
+
+        // WRITELN with no parameters.
+        if (parmsNode == null) {
+            emit(INVOKEVIRTUAL, "java/io/PrintStream.println()V");
+            localStack.decrease(1);
+        }
+
+        // WRITE or WRITELN with parameters.
+        else {
+            ArrayList<ICodeNode> actuals = parmsNode.getChildren();
+
+            // Load the format strings.
+            emit(LDC, buffer.toString());
+            localStack.increase(1);
+
+            // Generate code to create the values array for String.format().
+            if (exprCount > 0) {
+                emitLoadConstant(exprCount);
+                emit(ANEWARRAY, "java/lang/Object");
+                localStack.use(3, 1);
+
+                int index = 0;
+                ExpressionGenerator exprGenerator = new ExpressionGenerator(this);
+
+                // Loop to generate code to evaluate each actual parameter.
+                for (ICodeNode writeParmNode : actuals) {
+                    ArrayList<ICodeNode> children = writeParmNode.getChildren();
+                    ICodeNode exprNode = children.get(0);
+                    ICodeNodeType nodeType = exprNode.getType();
+                    TypeSpec dataType = exprNode.getTypeSpec().baseType();
+
+                    // Skip string constants, which were made part of
+                    // the format string.
+                    if (nodeType != STRING_CONSTANT) {
+                        emit(DUP);
+                        emitLoadConstant(index++);
+                        localStack.increase(2);
+
+                        exprGenerator.generate(exprNode);
+
+                        String signature = dataType.getForm() == SCALAR
+                                            ? valueSignature(dataType)
+                                            : null;
+
+                        // Boolean write "true" or "false".
+                        if (dataType == Predefined.booleanType) {
+                            Label trueLabel = Label.newLabel();
+                            Label nextLabel = Label.newLabel();
+                            emit(IFNE, trueLabel);
+                            emit(LDC,"\"false\"");
+                            emit(Instruction.GOTO, nextLabel);
+                            emitLabel(trueLabel);
+                            emit(LDC, "\"true\"");
+                            emitLabel(nextLabel);
+
+                            localStack.use(1);
+                        }
+
+                        // Convert a scalar value to an object.
+                        if (signature != null) {
+                            emit(INVOKESTATIC, signature);
+                        }
+
+                        // Store the value into the values vector.
+                        emit(AASTORE);
+                        localStack.decrease(1);
+                    }
+                }
+
+                // Format the string.
+                emit(INVOKESTATIC, "java/lang/String/format(Ljava/lang/String;" +
+                                           "[Ljava/lang/Object;)Ljava/lang/String;");
+            }
+
+            // Print
+            emit(INVOKEVIRTUAL, "java/io/PrintStream.print(Ljava/lang/String;)V");
+            localStack.decrease(2);
+        }
     }
 
     /**
