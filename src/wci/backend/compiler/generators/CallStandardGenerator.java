@@ -303,7 +303,33 @@ public class CallStandardGenerator extends CallGenerator {
      * @param routineCode the routine code.
      * @param actualNode the actual parameter node.
      */
-    private void generateAbsSqr(RoutineCode routineCode, ICodeNode actualNode) {
+    private void generateAbsSqr(RoutineCode routineCode, ICodeNode actualNode)
+    {
+        exprGenerator.generate(actualNode);
+
+        // ABS: Generate code to call the appropriate integer or float
+        //      java.lang.Math method.
+        // SQR: Multiply the value by itself.
+        if (actualNode.getTypeSpec() == Predefined.integerType) {
+            if (routineCode == ABS) {
+                emit(INVOKESTATIC, "java/lang/Maths/abs(I)I");
+            }
+            else {
+                emit(DUP);
+                emit(IMUL);
+                localStack.use(1);
+            }
+        }
+        else {  // float type
+            if (routineCode == ABS) {
+                emit(INVOKESTATIC, "java/lang/Math/abs(F)F");
+            }
+            else {
+                emit(DUP);
+                emit(FMUL);
+                localStack.use(1);
+            }
+        }
     }
 
     /**
@@ -311,7 +337,35 @@ public class CallStandardGenerator extends CallGenerator {
      * @param routineCode the routine code.
      * @param actualNode the actual parameter node.
      */
-    private void generateArctanCosExpLnSinSqrt(RoutineCode routineCode, ICodeNode actualNode) {
+    private void generateArctanCosExpLnSinSqrt(RoutineCode routineCode, ICodeNode actualNode)
+    {
+        String function = null;
+        exprGenerator.generate(actualNode);
+
+        // Convert an integer or real value to double.
+        TypeSpec actualType = actualNode.getTypeSpec();
+        if (actualType == Predefined.integerType) {
+            emit(I2D);
+        }
+        else {
+            emit(F2D);
+        }
+
+        // Select the appropriate java.lang.math method.
+        switch ((RoutineCodeImpl) routineCode) {
+            case ARCTAN:    function = "atan";  break;
+            case COS:       function = "cos";   break;
+            case EXP:       function = "exp";   break;
+            case SIN:       function = "sin";   break;
+            case LN:        function = "log";   break;
+            case SQRT:      function = "sqrt";  break;
+        }
+
+        // Call the method and convert the result from double to float.
+        emit(INVOKESTATIC, "java/lang/Math" + function + "(D)D");
+        emit(D2F);
+
+        localStack.use(1);
     }
 
     /**
@@ -319,28 +373,56 @@ public class CallStandardGenerator extends CallGenerator {
      * @param routineCode the routine code.
      * @param actualNode the actual parameter node.
      */
-    private void generatePredSucc(RoutineCode routineCode, ICodeNode actualNode) {
+    private void generatePredSucc(RoutineCode routineCode, ICodeNode actualNode)
+    {
+        // generate code to add or subtract 1 from the value.
+        exprGenerator.generate(actualNode);
+        emit(ICONST_1);
+        emit(routineCode == PRED ? ISUB : IADD);
+
+        localStack.use(1);
     }
 
     /**
      * Generate code for a call to chr.
      * @param actualNode the actual parameter node.
      */
-    private void generateChr(ICodeNode actualNode) {
+    private void generateChr(ICodeNode actualNode)
+    {
+        exprGenerator.generate(actualNode);
+        emit(I2C);
     }
 
     /**
      * Generate code for a call to odd.
      * @param actualNode the actual parameter node.
      */
-    private void generateOdd(ICodeNode actualNode) {
+    private void generateOdd(ICodeNode actualNode)
+    {
+        // Generate code to leave the rightmost bit of the value
+        // on the operand stack.
+        exprGenerator.generate(actualNode);
+        emit(ICONST_1);
+        emit(IAND);
+
+        localStack.use(1);
     }
 
     /**
      * Generate code for a call to ord.
      * @param actualNode the actual parameter node.
      */
-    private void generateOrd(ICodeNode actualNode) {
+    private void generateOrd(ICodeNode actualNode)
+    {
+        // A character value is treated as an integer value.
+        if (actualNode.getType() == STRING_CONSTANT) {
+            int value = ((String) actualNode.getAttribute(VALUE)).charAt(0);
+            emitLoadConstant(value);
+            localStack.increase(1);
+        }
+        else {
+            exprGenerator.generate(actualNode);
+        }
     }
 
     /**
@@ -348,8 +430,18 @@ public class CallStandardGenerator extends CallGenerator {
      * @param routineCode the routine code.
      * @param actualNode the actual parameter node.
      */
-    private void generateRoundTrunc(RoutineCode routineCode, ICodeNode actualNode) {
+    private void generateRoundTrunc(RoutineCode routineCode, ICodeNode actualNode)
+    {
+        exprGenerator.generate(actualNode);
+
+        // ROUND: Generate code to compute floor(value + 0.5)
+        if (routineCode == ROUND) {
+            emitLoadConstant(0.5f);
+            emit(FADD);
+            localStack.use(1);
+        }
+
+        // Truncate.
+        emit(F2I);
     }
-
-
 }
